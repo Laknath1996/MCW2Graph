@@ -17,6 +17,8 @@ import torch.nn.functional as F
 from torch_geometric.data import Data, DataLoader
 from torch_geometric.nn import ChebConv, global_add_pool, GCNConv
 
+print("training...")
+
 ## loading the TMA map data
 dataset1 = h5py.File(
     '/Users/ashwin/Current Work/Real-Time Hand Gesture Recognition with TMA Maps/src/gsp/subject_2001/trans_map_dataset_1_gsp.h5',
