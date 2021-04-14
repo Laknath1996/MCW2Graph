@@ -1,5 +1,5 @@
 #
-# Created on Mon Jan 04 2021 12:14:14 PM
+# Created on Wed Apr 14 2021 7:23:57 PM
 #
 # The MIT License (MIT)
 # Copyright (c) 2021 Ashwin De Silva
@@ -18,7 +18,12 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+# Objective : Define the Graph Recurrent Neual Network Architectures
 
+
+# ////// libraries ///// 
+
+# standard 
 import torch
 from torch._C import device
 import torch.nn as nn
@@ -26,6 +31,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.nn.glob.glob import global_mean_pool
 
+# ////// body ///// 
 
 class GraphConvRNN(torch.nn.Module):
     """
