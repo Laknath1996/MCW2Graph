@@ -32,7 +32,6 @@ The code is based on the following paper :
     Spain, 2020, pp. 1299-1303.
 """
 
-
 from tma.utils import *
 import matplotlib.pyplot as plt
 
@@ -46,7 +45,6 @@ from threading import Lock
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # np.seterr(divide='ignore', invalid='ignore') # ignore the true division error
 
-
 class EmgCollector(myo.DeviceListener):
     def __init__(self, start):
         self.emg_data = np.zeros((1, 8))
@@ -59,7 +57,6 @@ class EmgCollector(myo.DeviceListener):
     def on_emg(self, event):
         self.emg_data = np.concatenate((self.emg_data, np.reshape(np.array(event.emg), (1, 8))), axis=0)
         print(time.time() - self.start)
-
 
 class EmgGraphLearn(object):
     """
