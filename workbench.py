@@ -38,25 +38,30 @@ from torch_geometric.nn import ChebConv, global_add_pool, GCNConv
 from grnn.architectures import *
 from tma.utils import load_graph_data
 
-## loading graph data
-train_dataset = 'data/subject_1002_Malsha/graph_dataset_1.txt'
-test_dataset = 'data/subject_1002_Malsha/graph_dataset_2.txt'
+A = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]).T
+print(A.view(3, 4, 2))
+A = A.view(3, 4, 2)
+print(A.reshape(3, 8))
 
-trainData = load_graph_data(train_dataset)
+# ## loading graph data
+# train_dataset = 'data/subject_1002_Malsha/graph_dataset_1.txt'
+# test_dataset = 'data/subject_1002_Malsha/graph_dataset_2.txt'
 
-# # define data loaders
-train_loader = DataLoader(trainData, batch_size=16, shuffle=True)
+# trainData = load_graph_data(train_dataset)
+
+# # # define data loaders
+# train_loader = DataLoader(trainData, batch_size=16, shuffle=True)
 
 # # # forward pass test 
 # print(trainData[0])
-model = GCRNNGCN(1, 4, 8, 8, 5)
+# model = GCRNNGCN(1, 4, 8, 8, 5)
 # out = model(trainData[0])
 # print(out)
 
-for data in train_loader:
-    print(data)
-    out = model(data)
-    print(out)
+# for data in train_loader:
+#     print(data)
+#     out = model(data)
+#     print(out)
 
 # train the network
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

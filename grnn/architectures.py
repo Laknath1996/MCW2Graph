@@ -28,7 +28,7 @@ import torch
 from torch._C import device
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, ChebConv
 from torch_geometric.nn.glob.glob import global_mean_pool
 
 # ////// body ///// 
@@ -39,8 +39,10 @@ class GraphConvRNN(torch.nn.Module):
     """
     def __init__(self, inChannels, outChannels):
         super(GraphConvRNN, self).__init__()
-        self.A = GCNConv(inChannels, outChannels)
-        self.B = GCNConv(outChannels, outChannels)
+        # self.A = GCNConv(inChannels, outChannels)
+        # self.B = GCNConv(outChannels, outChannels)
+        self.A = ChebConv(inChannels, outChannels, K=4)
+        self.B = ChebConv(outChannels, outChannels, K=4)
 
     def forward(self, X, h0):
         """
@@ -54,9 +56,9 @@ class GraphConvRNN(torch.nn.Module):
         # recurrent forward computation : h_t = \sigma( A(S) * x_t + B(S) * h_{t-1}
         h = h0
         for t in range(T):
-            h = self.A(x[..., t].view(N, 1), edge_index, edge_weight) + self.B(h, edge_index, edge_weight)
+            h = self.A(x.select(-1, t).view(N, 1), edge_index, edge_weight) + self.B(h, edge_index, edge_weight)
             h = torch.sigmoid(h)
-            H = torch.cat([H, h], 1) # get the [h_t, h_{t-1},..., h_0] sequence
+            H = torch.cat([H, h], 1) # get the [h_t, h_{t-1},..., h_1] sequence
 
         return H
 
@@ -64,7 +66,7 @@ class GraphConvRNN(torch.nn.Module):
 class GCRNNMLP(torch.nn.Module):
     """
     h_t = \sigma( A(S) * x_t + B(S) * h_{t-1} )
-    y_hat = MLP(flatten([h_t, h_{t-1}, ..., h_0])
+    y_hat = MLP(flatten([h_t, h_{t-1}, ..., h_1])
     """
     def __init__(self, inChannels, hiddenChannels, numNodes, numClasses, T=80):
         super(GCRNNMLP, self).__init__()
@@ -138,8 +140,8 @@ class GCRNNGCN(torch.nn.Module):
         return torch.softmax(y_hat, dim=1)
 
     def init_hidden(self, batchSize):
-        return torch.zeros(self.numNodes*batchSize, self.hiddenChannels)
-
+        return torch.zeros(self.numNodes*batchSize, self.hiddenChannels) # zero initialization 
+        # return torch.nn.init.xavier_normal_(torch.empty(self.numNodes*batchSize, self.hiddenChannels), gain=1.0) # Xavier intialization
 
 # class GCRNNGCN(torch.nn.Module):
 #     """

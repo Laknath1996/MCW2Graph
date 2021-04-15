@@ -61,7 +61,7 @@ if gcrnnmlpMethod:
     model_path = 'data/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights.txt'
 
 ## training parameters
-epochs = 200
+epochs = 50
 saveModel = True
 trainModel = True
 
@@ -123,7 +123,8 @@ if gcrnnmlpMethod:
     # define the optimizer
     optimizer = torch.optim.Adam(model.parameters(), 
                                 lr=0.001, 
-                                weight_decay=5e-4)
+                                betas=(0.9, 0.999),
+                                weight_decay=0)
 
     ## train model                            
     if trainModel:
