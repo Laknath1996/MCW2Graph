@@ -58,10 +58,10 @@ if tmacnnMethod:
 if gcrnnmlpMethod:
     train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1.txt'
     test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2.txt'
-    model_path = 'data/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights.txt'
+    model_path = 'data/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights_e200_clip0.5.txt'
 
 ## training parameters
-epochs = 50
+epochs = 200
 saveModel = True
 trainModel = True
 
@@ -115,7 +115,7 @@ if gcrnnmlpMethod:
     #                 numClasses=5)
 
     model = GCRNNGCN(inChannels=1, 
-                    hiddenChannels=4,
+                    hiddenChannels=16,
                     outChannels=8,
                     numNodes=8,
                     numClasses=5)
@@ -131,10 +131,13 @@ if gcrnnmlpMethod:
         # load training data 
         print('loading training data...')
         trainData = load_graph_data(train_dataset)
-        train_loader = DataLoader(trainData, batch_size=16, shuffle=True)
+        print("Training Examples = ", len(trainData))
 
         # shuffle training data
-        # random.shuffle(trainData)    
+        random.shuffle(trainData)    
+
+        # define the loader
+        train_loader = DataLoader(trainData, batch_size=32, shuffle=True)
 
         # commence training
         print('training...')
@@ -145,8 +148,25 @@ if gcrnnmlpMethod:
                 out = model(data)
                 loss = F.cross_entropy(out, data.y)
                 loss.backward()
+
+                # gradient clipping in GCRNN layer
+                for count, param in enumerate(model.parameters(), 1):
+                    if count == 5:
+                        break
+                    else:
+                        torch.nn.utils.clip_grad_norm_(param, 0.5)
+                    
                 optimizer.step()
 
+                # # compute norm statistics
+                # total_norm = 0
+                # for p in model.parameters():
+                #     param_norm = p.grad.data.norm(2)
+                #     total_norm += param_norm.item() ** 2
+                # total_norm = total_norm ** (1. / 2)
+                # print('Total grad norm = ', total_norm)
+
+                # print loss
                 if (i + 1) % 10 == 0:
                     print(
                         f"Epoch [{epoch + 1}/{epochs}], "
@@ -168,7 +188,8 @@ if gcrnnmlpMethod:
 
     # load testing data
     print('loading testing data...')
-    testData = load_graph_data(test_dataset)
+    testData = load_graph_data(test_dataset) 
+    print("Testing Examples = ", len(testData))
     test_loader = DataLoader(testData, batch_size=1, shuffle=True)
 
     # validate model
