@@ -137,35 +137,8 @@ class GCRNNGCN(torch.nn.Module):
         z_t = z_t.view(batchSize, self.numNodes, int(self.outChannels/2))    # Rearrange
         z_t = z_t.view(batchSize,  int(self.numNodes * self.outChannels/2))  # flatten
         y_hat = self.fc(z_t)                                            # MLP layer
-        return torch.softmax(y_hat, dim=1)
+        return F.log_softmax(y_hat, dim=1)
 
     def init_hidden(self, batchSize):
         return torch.zeros(self.numNodes*batchSize, self.hiddenChannels) # zero initialization 
         # return torch.nn.init.xavier_normal_(torch.empty(self.numNodes*batchSize, self.hiddenChannels), gain=1.0) # Xavier intialization
-
-# class GCRNNGCN(torch.nn.Module):
-#     """
-#     h_t = \sigma( A(S) * x_t + B(S) * h_{t-1} )
-#     z_t = \phi(h_t) = ReLU (C(S) * h_t)
-#     y_t = MLP(z_t)
-#     """
-#     def __init__(self, inChannels, hiddenChannels, outChannels, numNodes, numClasses):
-#         super(GCRNNGCN, self).__init__()
-#         self.numNodes = numNodes
-#         self.hiddenChannels = hiddenChannels
-#         self.gcrnn = GraphConvRNN(inChannels, hiddenChannels)
-#         self.phi = GCNConv(hiddenChannels, outChannels)
-#         self.fc = nn.Linear(outChannels*numNodes, numClasses)
-
-#     def forward(self, X):
-#         edge_index, edge_weight = X.edge_index, X.edge_attr
-#         h0 = self.init_hidden()
-#         H = self.gcrnn(X, h0)
-#         h_t = H.narrow(1,-self.hiddenChannels, self.hiddenChannels) # obtain h_t from the GCRNN output sequence
-#         z_t = self.phi(h_t, edge_index, edge_weight)
-#         z_t = F.relu(z_t)
-#         y_hat = self.fc(z_t.view(-1))
-#         return torch.softmax(y_hat, dim=0)
-
-#     def init_hidden(self):
-#         return torch.zeros(self.numNodes, self.hiddenChannels)

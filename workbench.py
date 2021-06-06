@@ -25,23 +25,27 @@
 
 # standard 
 import os
-from torch_geometric.utils.loop import remove_self_loops
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-import random
-import h5py
 import numpy as np
-import torch
-from torch_geometric.data import Data, DataLoader
-from torch_geometric.nn import ChebConv, global_add_pool, GCNConv
+import scipy.io as sio
 
 # internal
-from grnn.architectures import *
-from tma.utils import load_graph_data
+from graph_learning.utils import createWeightedGraph, unvectorize
 
-A = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]).T
-print(A.view(3, 4, 2))
-A = A.view(3, 4, 2)
-print(A.reshape(3, 8))
+## load data
+dic = sio.loadmat('/Users/ashwin/Current Work/GRNNmyo/smoothautoregressgl_outputs_ashwin_2n.mat')
+X = dic['W']
+y = dic['y'].squeeze()
+
+Xc = X[y==0]
+w = np.mean(Xc, axis=0)
+W = unvectorize(w.squeeze())
+W = W + np.matmul(W, W)
+createWeightedGraph(W, semgConfig=True, title='Pointer - Trial 1 (Malsha)')
+
+# A = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]).T
+# print(A.view(3, 4, 2))
+# A = A.view(3, 4, 2)
+# print(A.reshape(3, 8))
 
 # ## loading graph data
 # train_dataset = 'data/subject_1002_Malsha/graph_dataset_1.txt'

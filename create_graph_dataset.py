@@ -24,6 +24,7 @@
 #////// libraries ///////
 
 # standard
+from learn_graph_from_data import W
 import pickle
 import torch
 from torch_geometric.utils.loop import remove_self_loops
