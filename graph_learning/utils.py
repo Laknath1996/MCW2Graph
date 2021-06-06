@@ -34,8 +34,12 @@ from torch_geometric.data import Data
 
 # ////// body ///// 
 def getEllipticalCoordinates():
-    """
-    The coordinates of the nodes (electrodes in this case)
+    """Obtain the node coordinates
+
+    Returns
+    -------
+    pos : dict
+        A dictionary including the 2D coordinates for each node
     """
     pos = { 0: (-2*2**0.5, -1.5*2**0.5),
             1: (-4, 0),
@@ -96,8 +100,14 @@ def createWeightedGraphBeta(W, semgConfig=True, seed=1, **kwargs):
     plt.show()
 
 def plotMultiChannelSignals(X, Fs):
-    """
-    plot multi-channel signals
+    """Plots the given multi-channel window
+
+    Parameters
+    ----------
+    X : array
+        Multi-channel window of shape (numChannels, numSamples)
+    Fs : float
+        Sampling freqency in Hertz
     """
     L = X.shape[0]
     N = X.shape[1]

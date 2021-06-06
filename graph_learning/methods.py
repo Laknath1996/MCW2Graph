@@ -31,26 +31,19 @@ from scipy.stats import t
 # ////// body ///// 
 
 class CorrelationGraphLearn:
-    def __init__(self, X, alpha):
-        """
-        Learning graph topolgy using correlation coefficients estimated 
+    """ Learns graph topolgy using correlation coefficients estimated 
         from nodal samples.
-
-        Math
-        ----------
-        a_ij = |r_ij|,   when rho_ij is significantly non-zero
-        a_ij = 0,        when rho_ij is significantly zero
 
         Parameters
         ----------
         X : numpy array
-            2 x 2 matrix with each row representing a channel and each
-            column representing a time point/ sample.
-
-        alpha : float scalar
+            array of shape (L, N) where each row representing a channel and each
+            column representing a time point/sample.
+        alpha : float
             significant level used when testing the staistical significance
-            of the computed sample correlation coefficients
+            of the population correlation coefficients
         """
+    def __init__(self, X, alpha):
         super(CorrelationGraphLearn, self).__init__()
         self.X = X
         self.alpha = alpha
@@ -59,17 +52,18 @@ class CorrelationGraphLearn:
 
     def isRhoSignificant(self, r):
         """
-        staitsical test for testing the significance of the correlation
-        coefficient.
+        Carries out the staitsical test to test the significance of the population
+        correlation coefficient.
 
         Parameters
         ----------
         r : float 
-            The computed sample correlation coefficient
+            The sample correlation coefficient
 
         Returns
         ----------
-        Whether r is significant or not : bool
+        bool
+            If significant, returns ``True``. If not significant, returns ``False``
         """
         n = self.N
         df = n - 2
@@ -82,12 +76,12 @@ class CorrelationGraphLearn:
 
     def findGraph(self):
         """
-        Learns and returns the graph topology in the form of an
-        adjacency matrix
+        Computes the adjacency matrix.
 
         Returns
         ----------
-        W : numpy array of shape (nChannels, nChannels)
+        numpy array
+            An adjacency matrix of shape (L, L)
         """
         Y = self.X
         L = self.L
@@ -107,8 +101,17 @@ class CorrelationGraphLearn:
 class PartialCorrelationGraphLearn:
     def __init__(self, X, alpha):
         """
-        Learning graph topology using partial correlation coefficients
-        estimated using nodal samples.
+        Learns graph topolgy using partial correlation coefficients estimated 
+        from nodal samples.
+
+        Parameters
+        ----------
+        X : numpy array
+            array of shape (L, N) where each row representing a channel and each
+            column representing a time point/sample.
+        alpha : float
+            significant level used when testing the staistical significance
+            of the population partial correlation coefficients
         """
         super(PartialCorrelationGraphLearn, self).__init__()
         self.X = X
@@ -118,17 +121,18 @@ class PartialCorrelationGraphLearn:
 
     def isRhoBarSignificant(self, rbar):
         """
-        staitsical test for testing the significance of the partial correlation
-        coefficient.
+        Carries out the staitsical test for testing the significance of the population 
+        partial correlation coefficient.
 
         Parameters
         ----------
         rbar : float 
-            The computed sample partial correlation coefficient
+            The sample partial correlation coefficient
 
         Returns
         ----------
-        Whether rbar is significant or not : bool
+        bool
+            If significant, returns ``True``. If not significant, returns ``False``
         """
         n = self.N
         k = self.L - 2
@@ -142,12 +146,12 @@ class PartialCorrelationGraphLearn:
 
     def findGraph(self):
         """
-        Learns and returns the graph topology in the form of an
-        adjacency matrix
+        Computes the adjacency matrix.
 
         Returns
         ----------
-        W : numpy array of shape (nChannels, nChannels)
+        numpy array
+            An adjacency matrix of shape (L, L)
         """
         Y = self.X
         L = self.L

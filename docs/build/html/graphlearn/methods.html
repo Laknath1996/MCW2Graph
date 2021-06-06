@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Graph Topology Learning Methods &mdash; MCW2Graph  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Graph Learning Utilities" href="utilities.html" />
+    <link rel="prev" title="Graph Learning" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MCW2Graph
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Graph Learning</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Graph Topology Learning Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#correlation-based-graph-topology-learning">Correlation based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#partial-correlation-based-graph-topology-learning">Partial Correlation based Graph Topology Learning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utilities.html">Graph Learning Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#get-nodal-coordinates">Get Nodal Coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#plot-multi-channel-signal-window">Plot Multi-Channel Signal Window</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCW2Graph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Graph Learning</a> &raquo;</li>
+        
+      <li>Graph Topology Learning Methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/graphlearn/methods.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="graph-topology-learning-methods">
+<h1>Graph Topology Learning Methods<a class="headerlink" href="#graph-topology-learning-methods" title="Permalink to this headline">¶</a></h1>
+<p>Consider a multi-channel window <span class="math notranslate nohighlight">\(\mathbf{X} = [y_0^\top, y_1^\top, \dots, y_{L-1}^\top]^\top
+\in \mathbb{R}^{L \times N}\)</span>.Here, <span class="math notranslate nohighlight">\(L\)</span> is the number of channels, <span class="math notranslate nohighlight">\(N\)</span> is the
+number of time points/ samples, and <span class="math notranslate nohighlight">\(y_i = \big[y_i[0], y_i[1], \dots, y_i[N-1]\big]^\top\)</span>
+is the vector including the signal values in channel <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<p>Let <span class="math notranslate nohighlight">\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)</span> be the underlying graph of the
+muli-channel window <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>, characterized by the adjancency matrix <span class="math notranslate nohighlight">\(\mathbf{W}\)</span>.</p>
+<div class="section" id="correlation-based-graph-topology-learning">
+<h2>Correlation based Graph Topology Learning<a class="headerlink" href="#correlation-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
+<p>We compute the sample correlation coefficient <span class="math notranslate nohighlight">\(r_{ij}\)</span> between <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> channels using
+the following equation.</p>
+<div class="math notranslate nohighlight">
+\[r_{ij} = \frac{(y_i - \bar{y_i})^\top (y_j - \bar{y_j})}{\Vert y_i - \bar{y_i}\Vert_2 \Vert y_j - \bar{y_j})\Vert_2}\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\bar{y_i} = \big( N^{-1} \sum_{n=0}^{N-1} y_i[n] \big) \mathbf{1}\)</span>.</p>
+<p>The following hypothesis testing is employed to test whether the population correlation
+coefficient <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is significant.</p>
+<div class="math notranslate nohighlight">
+\[H_0 \; : \; \rho_{i,j} = 0\]</div>
+<div class="math notranslate nohighlight">
+\[H_1 \; : \; \rho_{i,j} \neq 0\]</div>
+<div class="math notranslate nohighlight">
+\[t^\ast = \frac{r_{ij}\sqrt{n-2}}{\sqrt{1-r_{ij}^2}} \: \sim \: t_{n-2}\]</div>
+<p>Thereafter, we construct <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> as follows.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{W}_{ij} =
+\begin{cases}
+  |r_{ij}|, &amp; \rho_{ij} \text{ is significant} \\
+  0, &amp; \rho_{ij} \text{ is not significant} \\
+\end{cases}\end{split}\]</div>
+<dl class="py class">
+<dt id="graph_learning.methods.CorrelationGraphLearn">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></code><code class="sig-name descname"><span class="pre">CorrelationGraphLearn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learns graph topolgy using correlation coefficients estimated
+from nodal samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy array</em>) – array of shape (L, N) where each row representing a channel and each
+column representing a time point/sample.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – significant level used when testing the staistical significance
+of the population correlation coefficients</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="graph_learning.methods.CorrelationGraphLearn.findGraph">
+<code class="sig-name descname"><span class="pre">findGraph</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An adjacency matrix of shape (L, L)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="graph_learning.methods.CorrelationGraphLearn.isRhoSignificant">
+<code class="sig-name descname"><span class="pre">isRhoSignificant</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.isRhoSignificant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Carries out the staitsical test to test the significance of the population
+correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>r</strong> (<em>float</em>) – The sample correlation coefficient</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If significant, returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. If not significant, returns <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="partial-correlation-based-graph-topology-learning">
+<h2>Partial Correlation based Graph Topology Learning<a class="headerlink" href="#partial-correlation-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
+<p>We compute the sample partial correlation coefficient <span class="math notranslate nohighlight">\(\tilde{r}_{ij}\)</span> between <span class="math notranslate nohighlight">\(i\)</span>
+and <span class="math notranslate nohighlight">\(j\)</span> channels using the following equation.</p>
+<div class="math notranslate nohighlight">
+\[\tilde{r}_{ij} = \frac{\Theta_{ij}}{\sqrt{\Theta_{ii} \Theta{jj}}}\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\Theta = \text{cov}(\mathbf{X})\)</span>.</p>
+<p>The following hypothesis testing is employed to test whether the population correlation
+coefficient <span class="math notranslate nohighlight">\(\tilde{\rho}_{ij}\)</span> is significant.</p>
+<div class="math notranslate nohighlight">
+\[H_0 \; : \; \tilde{\rho}_{i,j} = 0\]</div>
+<div class="math notranslate nohighlight">
+\[H_1 \; : \; \tilde{\rho}_{i,j} \neq 0\]</div>
+<div class="math notranslate nohighlight">
+\[t^\ast = \tilde{r}_{ij} \sqrt{\frac{n - L}{1 - \tilde{r}_{ij}^2}} \: \sim \: t_{n-L}\]</div>
+<p>Thereafter, we construct <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> as follows.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{W}_{ij} =
+\begin{cases}
+  |\tilde{r}_{ij}|, &amp; \tilde{\rho}_{ij} \text{ is significant} \\
+  0, &amp; \tilde{\rho}_{ij} \text{ is not significant} \\
+\end{cases}\end{split}\]</div>
+<dl class="py class">
+<dt id="graph_learning.methods.PartialCorrelationGraphLearn">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></code><code class="sig-name descname"><span class="pre">PartialCorrelationGraphLearn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="graph_learning.methods.PartialCorrelationGraphLearn.findGraph">
+<code class="sig-name descname"><span class="pre">findGraph</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An adjacency matrix of shape (L, L)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant">
+<code class="sig-name descname"><span class="pre">isRhoBarSignificant</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rbar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Carries out the staitsical test for testing the significance of the population
+partial correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rbar</strong> (<em>float</em>) – The sample partial correlation coefficient</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If significant, returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. If not significant, returns <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="utilities.html" class="btn btn-neutral float-right" title="Graph Learning Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Graph Learning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Ashwin De Silva.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

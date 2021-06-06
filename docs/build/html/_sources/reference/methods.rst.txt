@@ -1,0 +1,15 @@
+********
+Graph Learning Methods
+********
+
+.. currentmodule:: graph_learning.methods
+
+Correlation based Graph Topology Inference
+-------------------------------------------
+
+.. autoclass:: CorrelationGraphLearn 
+
+Partial Correlation based Graph Topology Inference
+---------------------------------------------------
+
+.. autoclass:: PartialCorrelationGraphLearn
