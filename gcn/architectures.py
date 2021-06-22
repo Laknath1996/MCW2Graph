@@ -25,7 +25,7 @@ import torch
 from torch._C import device
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, ChebConv
 from torch_geometric.nn.glob.glob import global_mean_pool
 
 # internal 
@@ -40,15 +40,17 @@ class VanillaGCN(torch.nn.Module):
         super(VanillaGCN, self).__init__()
         self.hiddenChannels = hiddenChannels
         self.numNodes = numNodes
-        self.conv1 = GCNConv(inChannels, 2*hiddenChannels)
-        self.conv2 = GCNConv(2*hiddenChannels, hiddenChannels)
+        # self.conv1 = GCNConv(inChannels, 2*hiddenChannels)
+        # self.conv2 = GCNConv(2*hiddenChannels, hiddenChannels)
+        self.conv1 = ChebConv(inChannels, 2*hiddenChannels, K=4)
+        self.conv2 = ChebConv(2*hiddenChannels, hiddenChannels, K=4)
         self.fc = nn.Linear(hiddenChannels*numNodes, numClasses)
 
     def forward(self, data):
         x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
-        x = F.relu(self.conv1(x, edge_index, edge_attr))
-        x = F.relu(self.conv2(x, edge_index, edge_attr))
+        x = F.relu(self.conv1(x.float(), edge_index, edge_attr.float()))
+        x = F.relu(self.conv2(x.float(), edge_index, edge_attr.float()))
         x = x.view(data.num_graphs, self.hiddenChannels*self.numNodes)
         x = self.fc(x)                  
-        return F.softmax(x, dim=1)
+        return F.log_softmax(x, dim=1)
 

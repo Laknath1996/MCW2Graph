@@ -15,6 +15,7 @@ Documentation
    :maxdepth: 2
 
    graphlearn/index
+   data_handling/utilities
 
 Indices and tables
 -------------------

@@ -24,12 +24,13 @@
 #////// libraries ///////
 
 # standard
-from learn_graph_from_data import W
 import pickle
 import torch
 from torch_geometric.utils.loop import remove_self_loops
 from torch_geometric.data import Data
-
+import scipy.io as sio
+from scipy.sparse import coo_matrix
+from torch_geometric.utils import from_scipy_sparse_matrix
 # internal 
 from tma.utils import load_tma_data
 
@@ -39,8 +40,8 @@ from tma.utils import load_tma_data
 train_dataset = 'data/subject_1001_Ashwin/trans_map_dataset_2.h5'
 test_dataset = 'data/subject_1001_Ashwin/trans_map_dataset_3.h5'
 
-graph_train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1.txt'
-graph_test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2.txt'
+graph_train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1n.txt'
+graph_test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2n.txt'
 
 ## loading the TMA map data
 X_train, y_train = load_tma_data(train_dataset)
@@ -50,20 +51,28 @@ X_test, y_test = load_tma_data(test_dataset)
 X_train = X_train[:, :8, :]     # the multi-channel envelopes (8-channels of myo armband)  
 X_test = X_test[:, :8, :]       # the multi-channel envelopes (8-channels of myo armband)  
 
-## adjacency matrix in the COO format
-edge_index = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5,
-                            5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7],
-                           [0, 1, 2, 7, 0, 1, 2, 3, 7, 0, 1, 2, 3, 1, 2, 3, 4, 5, 3, 4, 5, 6, 3, 4,
-                            5, 6, 7, 4, 5, 6, 7, 0, 1, 5, 6, 7]], dtype=torch.long)  # edges
+# ## adjacency matrix in the COO format
+# edge_index = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5,
+#                             5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7],
+#                            [0, 1, 2, 7, 0, 1, 2, 3, 7, 0, 1, 2, 3, 1, 2, 3, 4, 5, 3, 4, 5, 6, 3, 4,
+#                             5, 6, 7, 4, 5, 6, 7, 0, 1, 5, 6, 7]], dtype=torch.long)  # edges
 
-edge_attr = torch.tensor([1.0000, 0.5790, 0.1845, 0.4516, 0.5790, 1.0000, 0.5790, 0.1013, 0.1013,
-                          0.1845, 0.5790, 1.0000, 0.4516, 0.1013, 0.4516, 1.0000, 0.4516, 0.1013,
-                          0.4516, 1.0000, 0.5790, 0.1845, 0.1013, 0.5790, 1.0000, 0.5790, 0.1013,
-                          0.1845, 0.5790, 1.0000, 0.4516, 0.4516, 0.1013, 0.1013, 0.4516, 1.0000],
-                         dtype=torch.float)  # edge weights
+# edge_attr = torch.tensor([1.0000, 0.5790, 0.1845, 0.4516, 0.5790, 1.0000, 0.5790, 0.1013, 0.1013,
+#                           0.1845, 0.5790, 1.0000, 0.4516, 0.1013, 0.4516, 1.0000, 0.4516, 0.1013,
+#                           0.4516, 1.0000, 0.5790, 0.1845, 0.1013, 0.5790, 1.0000, 0.5790, 0.1013,
+#                           0.1845, 0.5790, 1.0000, 0.4516, 0.4516, 0.1013, 0.1013, 0.4516, 1.0000],
+#                          dtype=torch.float)  # edge weights
 
-## remove self-loops of the adjacent matrix (graph)
-edge_index, edge_attr = remove_self_loops(edge_index, edge_attr)
+# ## remove self-loops of the adjacent matrix (graph)
+# edge_index, edge_attr = remove_self_loops(edge_index, edge_attr)
+
+dic1 = sio.loadmat('graph_data/subject_1001_Ashwin/smoothSignal_train_graph_topologies.mat')
+X1 = dic1['W']
+y1 = dic1['y'].squeeze()
+
+dic2 = sio.loadmat('graph_data/subject_1001_Ashwin/smoothSignal_test_graph_topologies.mat')
+X2 = dic2['W']
+y2 = dic2['y'].squeeze()
 
 ## creating the graph dataset using the TMA first order terms of each channel
 graphTrainDataset = []
@@ -72,6 +81,10 @@ for i in range(X_train.shape[0]):
     tma = X_train[i, ...].squeeze()
     x = torch.tensor(tma, dtype=torch.float)
     y = torch.tensor([y_train[i]], dtype=torch.long)
+    W = X1[i]
+    A = coo_matrix(W)
+    edge_index, edge_attr = from_scipy_sparse_matrix(A)
+    edge_index, edge_attr = remove_self_loops(edge_index, edge_attr)
     data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
     graphTrainDataset.append(data)
 
@@ -81,6 +94,10 @@ for i in range(X_test.shape[0]):
     tma = X_test[i, ...].squeeze()
     x = torch.tensor(tma, dtype=torch.float)
     y = torch.tensor([y_test[i]], dtype=torch.long)
+    W = X2[i]
+    A = coo_matrix(W)
+    edge_index, edge_attr = from_scipy_sparse_matrix(A)
+    edge_index, edge_attr = remove_self_loops(edge_index, edge_attr)
     data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
     graphTestDataset.append(data)
 

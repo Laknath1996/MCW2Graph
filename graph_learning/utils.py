@@ -41,14 +41,14 @@ def getEllipticalCoordinates():
     pos : dict
         A dictionary including the 2D coordinates for each node
     """
-    pos = { 0: (-2*2**0.5, -1.5*2**0.5),
-            1: (-4, 0),
-            2: (-2*2**0.5, 1.5*2**0.5),
-            3: (0, 3),
-            4: (2*2**0.5, 1.5*2**0.5),
-            5: (4,0),
-            6: (2*2**0.5, -1.5*2**0.5),
-            7: (0, -3)
+    pos = { 1: (-2*2**0.5, -1.5*2**0.5),
+            2: (-4, 0),
+            3: (-2*2**0.5, 1.5*2**0.5),
+            4: (0, 3),
+            5: (2*2**0.5, 1.5*2**0.5),
+            6: (4,0),
+            7: (2*2**0.5, -1.5*2**0.5),
+            8: (0, -3)
     }
     return pos
 
@@ -144,7 +144,6 @@ def createGraphDataset(X, y):
     """
     Xg = []
     for i in range(X.shape[0]):
-        # W = unvectorize(X[i].squeeze())
         W = X[i]
         A = coo_matrix(W)
         edge_index, edge_attr = from_scipy_sparse_matrix(A)
@@ -155,10 +154,56 @@ def createGraphDataset(X, y):
         Xg.append(data)
     return Xg
 
-def createWeightedGraph(W, graphIsDirected, *argv):
+def createMultiGraphDataset(X1, X2, y):
     """
-    create a network topolgy given its Adjacency matrix
+    Create the graph dataset for the multi-channel signals
     """
+    Xg = []
+    for k in range(X1.shape[0]):
+        W1 = X1[k]
+        W2 = X2[k]
+        
+        edge_index = np.empty((2, 0))
+        edge_attr = np.empty((0, 2))
+        for i in range(8):
+            for j in range(8):
+                if W1[i, j]==0 and W2[i, j]==0:
+                    continue
+                else:    
+                    ei = np.array([i, j]).reshape(2, 1)
+                    ea = np.array([W1[i, j], W2[i, j]]).reshape(1, 2)
+                    edge_index = np.hstack((edge_index, ei))
+                    edge_attr = np.vstack((edge_attr, ea))
+
+        edge_index = torch.tensor(edge_index, dtype=torch.long)
+        edge_attr = torch.tensor(edge_attr.squeeze())
+        edge_index, edge_attr = remove_self_loops(edge_index, edge_attr)        
+        x = torch.tensor(np.identity(8), dtype=torch.float)
+        yg = torch.tensor([y[k]], dtype=torch.long)
+        data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=yg)
+        Xg.append(data)
+    return Xg    
+
+def createWeightedGraph(W, remove_self_loops=True, title=None):
+    """Plots the corresponding weighted undirecte or directed graph topology
+    of the given adjacency matrix.
+
+    Parameters
+    ----------
+    W : numpy array
+        Adjacency matrix with shape (L, L). Currently, this function only
+        supports L=8
+    remove_self_loops : bool, optional
+        if True, remove self loops in the graph, by default True
+    title : str, optional
+        Title of the plotted graph topology, by default None
+    """
+    if np.allclose(W, W.T):
+        graphIsDirected = False
+    else:
+        graphIsDirected = True
+    if remove_self_loops:
+        np.fill_diagonal(W, 0)
     m = W.shape[0]
     pos = getEllipticalCoordinates()
     fig = plt.figure(facecolor="w")
@@ -169,7 +214,7 @@ def createWeightedGraph(W, graphIsDirected, *argv):
         G = nx.DiGraph()
         for i in range(0, m):
             for j in range(0, m):
-                G.add_edge(i, j, weight=W[i, j])
+                G.add_edge(i+1, j+1, weight=W[i, j])
 
         weights = list(nx.get_edge_attributes(G,'weight').values())
         weightColors = (weights - min(weights))/(max(weights)-min(weights))
@@ -195,8 +240,8 @@ def createWeightedGraph(W, graphIsDirected, *argv):
         weightMap = plt.cm.ScalarMappable(cmap=plt.cm.Blues, norm=norm)
         plt.axis('on')
         plt.colorbar(weightMap)
-        if argv is not None:
-            plt.title(argv[0])
+        if title is not None:
+            plt.title(title)
         plt.show()
 
     else:
@@ -204,7 +249,7 @@ def createWeightedGraph(W, graphIsDirected, *argv):
         G = nx.Graph()
         for i in range(0, m):
             for j in range(0, m):
-                G.add_edge(i, j, weight=W[i, j])
+                G.add_edge(i+1, j+1, weight=W[i, j])
 
         weights = list(nx.get_edge_attributes(G,'weight').values())
         weightWidths = (weights - min(weights))/(max(weights)-min(weights))*5
@@ -226,8 +271,8 @@ def createWeightedGraph(W, graphIsDirected, *argv):
         weightMap = plt.cm.ScalarMappable(cmap=plt.cm.Blues, norm=norm)
         plt.axis('on')
         plt.colorbar(weightMap)
-        if argv is not None:
-            plt.title(argv[0])
+        if title is not None:
+            plt.title(title)
         plt.show()  
 
 def rescaleMCW(X):

@@ -33,7 +33,7 @@ import random
 import torch
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.metrics import classification_report, accuracy_score
 
@@ -46,20 +46,20 @@ from gcn.architectures import VanillaGCN
 #////// user inputs ///////
 
 ## methods
-tmacnnMethod = False            # 1 : TMA Map + CNN
+tmacnnMethod = True            # 1 : TMA Map + CNN
 vanillagcnMethod = False        # 2 : Multi-Channel Window + Vanilla GCN
 gcrnnMethod = False             # 3 : GCRNN + MLP
-graphLearnGCNMethod = True      # 4 : Multi-Channel WIndow + Graph Learning + GCN
+graphLearnGCNMethod = False      # 4 : Multi-Channel WIndow + Graph Learning + GCN
 
 ## datasets
 
 if tmacnnMethod:
-    train_dataset = 'data/subject_1001_Ashwin/trans_map_dataset_2.h5'
-    test_dataset = 'data/subject_1001_Ashwin/trans_map_dataset_3.h5'
+    train_dataset = 'data/subject_1006_Ramith/trans_map_dataset_1.h5'
+    test_dataset = 'data/subject_1006_Ramith/trans_map_dataset_2.h5'
 
 if gcrnnMethod or vanillagcnMethod:
-    train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1.txt'
-    test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2.txt'
+    train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1n.txt'
+    test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2n.txt'
     model_path = 'data/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights_e200_clip0.5.txt'
 
 if graphLearnGCNMethod:
@@ -67,7 +67,7 @@ if graphLearnGCNMethod:
     test_dataset = 'graph_data/subject_1001_Ashwin/correlation_test_graph_topologies.mat'
 
 ## training parameters
-epochs = 100
+epochs = 20
 saveModel = False
 trainModel = True
 
@@ -83,6 +83,24 @@ if tmacnnMethod:
     # load testing data
     X_test, y_test = load_tma_data(test_dataset)
     X_test, y_test = shuffle(X_test, y_test)
+
+    ## select data
+    X1 = np.empty((0, X_train.shape[1], X_train.shape[2]))
+    X2 = np.empty((0, X_train.shape[1], X_train.shape[2]))
+    y1 = np.empty((0, ))
+    y2 = np.empty((0, ))
+    for i in range(5):
+        X_train_i = X_train[y_train==i]
+        X_test_i = X_test[y_test==i]
+        X1 = np.vstack((X1, X_train_i[:21*7]))
+        X1 = np.vstack((X1, X_test_i[:21*7]))
+        X2 = np.vstack((X2, X_train_i[21*7:]))
+        X2 = np.vstack((X2, X_test_i[21*7:]))
+        y1 = np.concatenate((y1, i*np.ones((21*14, ))))
+        y2 = np.concatenate((y2, i*np.ones((21*6, ))))
+
+    X_train, y_train = X1, y1
+    X_test, y_test = X2, y2
 
     # train the model 
     num_classes = len(np.unique(y_train))
@@ -100,7 +118,7 @@ if tmacnnMethod:
               verbose=1)
 
     # validate
-    y_pred = model.predict(X_test.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 1))
+    y_pred = model.predict(X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 1))
     y_pred = np.argmax(y_pred, axis=1)
     y_true = np.array(y_test, dtype='int')
     print(classification_report(y_true, y_pred, target_names=['M', 'R', 'HC', 'V', 'PO']))
@@ -234,6 +252,7 @@ if gcrnnMethod:
                         break
                     else:
                         torch.nn.utils.clip_grad_norm_(param, 0.5)
+
                 optimizer.step()
             print('epoch = {:n}, loss = {:.4f}'.format(epoch, loss.item()))
                 
@@ -267,7 +286,7 @@ if gcrnnMethod:
             y_pred.append(pred)
             y_true.append(data.y)
     print(classification_report(y_true, y_pred, target_names=['M', 'R', 'HC', 'V', 'PO']))
-print("Accuracy Score : {:.2f}".format(accuracy_score(y_true, y_pred)))
+    print("Accuracy Score : {:.2f}".format(accuracy_score(y_true, y_pred)))
 
 if graphLearnGCNMethod:
     ## Multi-Channel Window + Graph Learning + GCN Method

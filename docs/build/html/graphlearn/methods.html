@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,11 +31,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -91,13 +94,11 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Graph Topology Learning Methods</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#correlation-based-graph-topology-learning">Correlation based Graph Topology Learning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#partial-correlation-based-graph-topology-learning">Partial Correlation based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sparse-inverse-covariance-graphical-lasso-based-graph-topology-learning">Sparse Inverse Covariance (Graphical Lasso) based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smoothness-based-graph-topology-learning">Smoothness based Graph Topology Learning</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="utilities.html">Graph Learning Utilities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="utilities.html#get-nodal-coordinates">Get Nodal Coordinates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="utilities.html#plot-multi-channel-signal-window">Plot Multi-Channel Signal Window</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="utilities.html">Graph Learning Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -171,19 +172,28 @@
             
   <div class="section" id="graph-topology-learning-methods">
 <h1>Graph Topology Learning Methods<a class="headerlink" href="#graph-topology-learning-methods" title="Permalink to this headline">¶</a></h1>
-<p>Consider a multi-channel window <span class="math notranslate nohighlight">\(\mathbf{X} = [y_0^\top, y_1^\top, \dots, y_{L-1}^\top]^\top
-\in \mathbb{R}^{L \times N}\)</span>.Here, <span class="math notranslate nohighlight">\(L\)</span> is the number of channels, <span class="math notranslate nohighlight">\(N\)</span> is the
-number of time points/ samples, and <span class="math notranslate nohighlight">\(y_i = \big[y_i[0], y_i[1], \dots, y_i[N-1]\big]^\top\)</span>
+<p>Consider a multi-channel window <span class="math notranslate nohighlight">\(\mathbf{X} = [\mathbf{y}_1^\top, \mathbf{y}_2^\top, \dots, \mathbf{y}_L^\top]^\top
+\in \mathbb{R}^{L \times T}\)</span>. Here, <span class="math notranslate nohighlight">\(L\)</span> is the number of channels, <span class="math notranslate nohighlight">\(T\)</span> is the
+number of time points/ samples, and <span class="math notranslate nohighlight">\(\mathbf{y}_i = \big[y_i(t), y_i(1), \dots, y_i(T-1)\big]^\top\)</span>
 is the vector including the signal values in channel <span class="math notranslate nohighlight">\(i\)</span>.</p>
-<p>Let <span class="math notranslate nohighlight">\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)</span> be the underlying graph of the
-muli-channel window <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>, characterized by the adjancency matrix <span class="math notranslate nohighlight">\(\mathbf{W}\)</span>.</p>
+<p>Another way of looking at the multi-channel window considered above is taking it as <span class="math notranslate nohighlight">\(\mathbf{X}
+= [ \mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_{T-1}]\)</span> where <span class="math notranslate nohighlight">\(\mathbf{x}_n = [x_{1,t}, x_{2,t}, \dots, x_{L,t}] \in
+\mathbb{R}^L\)</span>. We can consider <span class="math notranslate nohighlight">\(\mathbf{x}_n\)</span> to be a graph signal at time point <span class="math notranslate nohighlight">\(t\)</span>, defined on the set of nodes
+<span class="math notranslate nohighlight">\(\mathcal{V} = \{1, 2, \dots, L\}\)</span> of an unknown weighted graph <span class="math notranslate nohighlight">\(\mathcal{G}_{\mathbf{X}}(\mathcal{V}, \mathcal{E}, \mathbf{W})\)</span> that
+underlies <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>. Here, <span class="math notranslate nohighlight">\(\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}\)</span> is the set of edges and
+<span class="math notranslate nohighlight">\(W : \mathcal{V} \times \mathcal{V} \rightarrow \mathbb{R}_{+}\)</span> is the adjacency matrix. The scalar
+value <span class="math notranslate nohighlight">\(x_{i,t}\)</span> is the graph signal value at the <span class="math notranslate nohighlight">\(i\)</span> th node at the <span class="math notranslate nohighlight">\(t\)</span> th time point.</p>
+<p>The <span class="math notranslate nohighlight">\(i\)</span> th node in <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> corresponds to the <span class="math notranslate nohighlight">\(i\)</span> th
+channel in <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>. The edge <span class="math notranslate nohighlight">\((i, j)\)</span> in <span class="math notranslate nohighlight">\(\mathcal{E}\)</span> represents
+the connection between the <span class="math notranslate nohighlight">\(i\)</span> th and <span class="math notranslate nohighlight">\(j\)</span> th channels. The entry
+<span class="math notranslate nohighlight">\(\mathbf{W}_{ij}\)</span> represents the strength of the connection between the <span class="math notranslate nohighlight">\(i\)</span> th and <span class="math notranslate nohighlight">\(j\)</span> th channels.</p>
 <div class="section" id="correlation-based-graph-topology-learning">
 <h2>Correlation based Graph Topology Learning<a class="headerlink" href="#correlation-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
 <p>We compute the sample correlation coefficient <span class="math notranslate nohighlight">\(r_{ij}\)</span> between <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> channels using
 the following equation.</p>
 <div class="math notranslate nohighlight">
-\[r_{ij} = \frac{(y_i - \bar{y_i})^\top (y_j - \bar{y_j})}{\Vert y_i - \bar{y_i}\Vert_2 \Vert y_j - \bar{y_j})\Vert_2}\]</div>
-<p>where, <span class="math notranslate nohighlight">\(\bar{y_i} = \big( N^{-1} \sum_{n=0}^{N-1} y_i[n] \big) \mathbf{1}\)</span>.</p>
+\[r_{ij} = \frac{(\mathbf{y}_i - \bar{\mathbf{y}_i})^\top (\mathbf{y}_j - \bar{\mathbf{y}_j})}{\Vert \mathbf{y}_i - \bar{\mathbf{y}_i}\Vert_2 \Vert \mathbf{y}_j - \bar{\mathbf{y}_j})\Vert_2}\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\bar{y_i} = \big( T^{-1} \sum_{t=0}^{T-1} y_i(t) \big) \mathbf{1}\)</span>.</p>
 <p>The following hypothesis testing is employed to test whether the population correlation
 coefficient <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is significant.</p>
 <div class="math notranslate nohighlight">
@@ -191,7 +201,7 @@ coefficient <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is s
 <div class="math notranslate nohighlight">
 \[H_1 \; : \; \rho_{i,j} \neq 0\]</div>
 <div class="math notranslate nohighlight">
-\[t^\ast = \frac{r_{ij}\sqrt{n-2}}{\sqrt{1-r_{ij}^2}} \: \sim \: t_{n-2}\]</div>
+\[t^\ast = \frac{r_{ij}\sqrt{T-2}}{\sqrt{1-r_{ij}^2}} \: \sim \: t_{T-2}\]</div>
 <p>Thereafter, we construct <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> as follows.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\mathbf{W}_{ij} =
@@ -200,8 +210,8 @@ coefficient <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is s
   0, &amp; \rho_{ij} \text{ is not significant} \\
 \end{cases}\end{split}\]</div>
 <dl class="py class">
-<dt id="graph_learning.methods.CorrelationGraphLearn">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></code><code class="sig-name descname"><span class="pre">CorrelationGraphLearn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.CorrelationGraphLearn">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></span><span class="sig-name descname"><span class="pre">CorrelationGraphLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learns graph topolgy using correlation coefficients estimated
 from nodal samples.</p>
 <dl class="field-list simple">
@@ -215,8 +225,8 @@ of the population correlation coefficients</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="graph_learning.methods.CorrelationGraphLearn.findGraph">
-<code class="sig-name descname"><span class="pre">findGraph</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.CorrelationGraphLearn.findGraph">
+<span class="sig-name descname"><span class="pre">findGraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the adjacency matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -229,8 +239,8 @@ of the population correlation coefficients</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="graph_learning.methods.CorrelationGraphLearn.isRhoSignificant">
-<code class="sig-name descname"><span class="pre">isRhoSignificant</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.isRhoSignificant" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.CorrelationGraphLearn.isRhoSignificant">
+<span class="sig-name descname"><span class="pre">isRhoSignificant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.CorrelationGraphLearn.isRhoSignificant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Carries out the staitsical test to test the significance of the population
 correlation coefficient.</p>
 <dl class="field-list simple">
@@ -248,14 +258,18 @@ correlation coefficient.</p>
 
 </dd></dl>
 
+<p><strong>References</strong></p>
+<p>[1] G. B. Giannakis, Y. Shen and G. V. Karanikolas, “Topology Identification and Learning over Graphs: Accounting for Nonlinearities and Dynamics,” in Proceedings of the IEEE, vol. 106, no. 5, pp. 787-807, May 2018, doi: 10.1109/JPROC.2018.2804318.</p>
+<p>[2] E. D. Kolaczyk, Statistical Analysis of Network Data: Methods and Models. New York, NY, USA: Springer-Verlag, 2009.</p>
 </div>
 <div class="section" id="partial-correlation-based-graph-topology-learning">
 <h2>Partial Correlation based Graph Topology Learning<a class="headerlink" href="#partial-correlation-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
-<p>We compute the sample partial correlation coefficient <span class="math notranslate nohighlight">\(\tilde{r}_{ij}\)</span> between <span class="math notranslate nohighlight">\(i\)</span>
+<p>Here, we assume that each <span class="math notranslate nohighlight">\(\mathbf{x}_t\)</span> is a Gaussian random vector. Then we can compute the sample partial correlation coefficient <span class="math notranslate nohighlight">\(\tilde{r}_{ij}\)</span> between <span class="math notranslate nohighlight">\(i\)</span>
 and <span class="math notranslate nohighlight">\(j\)</span> channels using the following equation.</p>
 <div class="math notranslate nohighlight">
-\[\tilde{r}_{ij} = \frac{\Theta_{ij}}{\sqrt{\Theta_{ii} \Theta{jj}}}\]</div>
-<p>where, <span class="math notranslate nohighlight">\(\Theta = \text{cov}(\mathbf{X})\)</span>.</p>
+\[\tilde{r}_{ij} = - \frac{\hat{\Theta}_{ij}}{\sqrt{\hat{\Theta}_{ii} \hat{\Theta}_{jj}}}\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\hat{\Theta}^{-1} = \hat{\Sigma} = T^{-1} (\mathbf{X} - \mathbf{1}\bar{\mathbf{x}}^\top)(\mathbf{X} - \mathbf{1}\bar{\mathbf{x}}^\top)^\top\)</span>
+is the sample covariance matrix.</p>
 <p>The following hypothesis testing is employed to test whether the population correlation
 coefficient <span class="math notranslate nohighlight">\(\tilde{\rho}_{ij}\)</span> is significant.</p>
 <div class="math notranslate nohighlight">
@@ -263,7 +277,7 @@ coefficient <span class="math notranslate nohighlight">\(\tilde{\rho}_{ij}\)</sp
 <div class="math notranslate nohighlight">
 \[H_1 \; : \; \tilde{\rho}_{i,j} \neq 0\]</div>
 <div class="math notranslate nohighlight">
-\[t^\ast = \tilde{r}_{ij} \sqrt{\frac{n - L}{1 - \tilde{r}_{ij}^2}} \: \sim \: t_{n-L}\]</div>
+\[t^\ast = \tilde{r}_{ij} \sqrt{\frac{T - L}{1 - \tilde{r}_{ij}^2}} \: \sim \: t_{T-L}\]</div>
 <p>Thereafter, we construct <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> as follows.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\mathbf{W}_{ij} =
@@ -272,11 +286,11 @@ coefficient <span class="math notranslate nohighlight">\(\tilde{\rho}_{ij}\)</sp
   0, &amp; \tilde{\rho}_{ij} \text{ is not significant} \\
 \end{cases}\end{split}\]</div>
 <dl class="py class">
-<dt id="graph_learning.methods.PartialCorrelationGraphLearn">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></code><code class="sig-name descname"><span class="pre">PartialCorrelationGraphLearn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.PartialCorrelationGraphLearn">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></span><span class="sig-name descname"><span class="pre">PartialCorrelationGraphLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt id="graph_learning.methods.PartialCorrelationGraphLearn.findGraph">
-<code class="sig-name descname"><span class="pre">findGraph</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.PartialCorrelationGraphLearn.findGraph">
+<span class="sig-name descname"><span class="pre">findGraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the adjacency matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -289,8 +303,8 @@ coefficient <span class="math notranslate nohighlight">\(\tilde{\rho}_{ij}\)</sp
 </dd></dl>
 
 <dl class="py method">
-<dt id="graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant">
-<code class="sig-name descname"><span class="pre">isRhoBarSignificant</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rbar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant">
+<span class="sig-name descname"><span class="pre">isRhoBarSignificant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rbar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Carries out the staitsical test for testing the significance of the population
 partial correlation coefficient.</p>
 <dl class="field-list simple">
@@ -308,6 +322,172 @@ partial correlation coefficient.</p>
 
 </dd></dl>
 
+<p><strong>References</strong></p>
+<p>[1] G. B. Giannakis, Y. Shen and G. V. Karanikolas, “Topology Identification and Learning over Graphs: Accounting for Nonlinearities and Dynamics,” in Proceedings of the IEEE, vol. 106, no. 5, pp. 787-807, May 2018, doi: 10.1109/JPROC.2018.2804318.</p>
+<p>[2] E. D. Kolaczyk, Statistical Analysis of Network Data: Methods and Models. New York, NY, USA: Springer-Verlag, 2009.</p>
+</div>
+<div class="section" id="sparse-inverse-covariance-graphical-lasso-based-graph-topology-learning">
+<h2>Sparse Inverse Covariance (Graphical Lasso) based Graph Topology Learning<a class="headerlink" href="#sparse-inverse-covariance-graphical-lasso-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
+<p>We solve the following optimization problem to estimate a sparse inverse covariance
+matrix <span class="math notranslate nohighlight">\(\hat{\Theta}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\Theta^\ast = \underset{\Theta \succcurlyeq 0}{\mathrm{argmin }} \: -\log (\det \Theta) + \text{tr} (\hat{\Sigma} \Theta) + \beta \Vert \Theta \Vert_1\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\hat{\Theta}^{-1} = \hat{\Sigma} = T^{-1} (\mathbf{X} - \mathbf{1}\bar{\mathbf{x}}^\top)(\mathbf{X} - \mathbf{1}\bar{\mathbf{x}}^\top)^\top\)</span>
+is the sample covariance matrix. The higher the <span class="math notranslate nohighlight">\(\beta\)</span>, the higher the sparsity of the resulting graph topology.</p>
+<p>This optimization is solved using the ADMM described in [3]. The following are the iteration steps.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+    \Theta_{k+1} &amp;= \mathcal{F}_{\gamma} (\psi_k - \frac{1}{\gamma} \Lambda_k - \frac{1}{\gamma} \hat{\Sigma}) \\
+    \psi_{k+1} &amp;= \text{ST}_{\beta / \gamma} (\Theta_{k+1} - \frac{1}{\gamma} \Lambda_k) \\
+    \Lambda_{k+1} &amp;= \Lambda_k + \gamma (\Theta_{k+1} - \psi_{k+1})
+\end{align}\end{split}\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\mathcal{F}_{\gamma} (\mathbf{X} = \mathbf{U} \text{diag} \{ \lambda_1, \dots, \lambda_n \} \mathbf{U}^\top) = \frac{1}{2} \mathbf{U} \text{diag} \big\{ \lambda_i + \sqrt{\lambda_i^2 + 4 / \gamma} \big\} \mathbf{U}^\top\)</span>, and
+<span class="math notranslate nohighlight">\(\text{ST}\)</span> is the soft-thresholding operator.</p>
+<p>After solving, we compute the partial
+correlation coefficients.</p>
+<div class="math notranslate nohighlight">
+\[\tilde{r}_{ij} = - \frac{\Theta^{\ast}_{ij}}{\sqrt{\Theta^{\ast}_{ii} \Theta^{\ast}_{jj}}}\]</div>
+<p>Thereafter, we test for the statistical significance of the partial correlation coefficients using
+the following test.</p>
+<div class="math notranslate nohighlight">
+\[H_0 \; : \; \tilde{\rho}_{i,j} = 0\]</div>
+<div class="math notranslate nohighlight">
+\[H_1 \; : \; \tilde{\rho}_{i,j} \neq 0\]</div>
+<div class="math notranslate nohighlight">
+\[t^\ast = \tilde{r}_{ij} \sqrt{\frac{T - L}{1 - \tilde{r}_{ij}^2}} \: \sim \: t_{T-L}\]</div>
+<p>Finally, we construct <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> as follows.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{W}_{ij} =
+\begin{cases}
+  |\tilde{r}_{ij}|, &amp; \tilde{\rho}_{ij} \text{ is significant} \\
+  0, &amp; \tilde{\rho}_{ij} \text{ is not significant} \\
+\end{cases}\end{split}\]</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></span><span class="sig-name descname"><span class="pre">GraphicalLassoGraphLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learns graph topolgy using sparse inverse covariance estimation using
+the graphical Lasso algorithm implemented by ADMM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy array</em>) – array of shape (L, N) where each row representing a channel and each
+column representing a time point/sample.</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Regularization parameter (sparsity tuner)</p></li>
+<li><p><strong>gamma</strong> (<em>float</em>) – step size</p></li>
+<li><p><strong>imax</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of iterations, by default 2000</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – tolarence, by default 1e-4</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – significant level used when testing the staistical significance
+of the population partial correlation coefficients, by default 0.05</p></li>
+<li><p><strong>verbosity</strong> (<em>bool</em><em>, </em><em>optional</em>) – print the convergence indicator at current iteration, by default False</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn.findGraph">
+<span class="sig-name descname"><span class="pre">findGraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An adjacency matrix of shape (L, L)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn.getFgamma">
+<span class="sig-name descname"><span class="pre">getFgamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn.getFgamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the function in ADMM that includes the eigendecomposition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Z</strong> (<em>array</em>) – input matrix to the function of size (L, L)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output of the function of size (L, L)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn.getSampleCovMatrix">
+<span class="sig-name descname"><span class="pre">getSampleCovMatrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn.getSampleCovMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the sample covariance matrix from the nodal samples</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Sample covariance matrix of size (L, L)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn.isRhoBarSignificant">
+<span class="sig-name descname"><span class="pre">isRhoBarSignificant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rbar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn.isRhoBarSignificant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Carries out the staitsical test for testing the significance of the population
+partial correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rbar</strong> (<em>float</em>) – The sample partial correlation coefficient</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If significant, returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. If not significant, returns <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.GraphicalLassoGraphLearn.softThresholding">
+<span class="sig-name descname"><span class="pre">softThresholding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.GraphicalLassoGraphLearn.softThresholding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the elementwise soft-thresholding output</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array</em>) – input array</p></li>
+<li><p><strong>zeta</strong> (<em>float</em>) – parameter of the soft-thresholding function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>soft-thresholded vector/matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p><strong>References</strong></p>
+<p>[1] J. Friedman, T. Hastie, and R. Tibshirani, “Sparse inverse covariance estimation with the graphical lasso,” Biostatistics, vol. 9,
+no. 3, pp. 432–441, Jul. 2008.</p>
+<p>[2] G. B. Giannakis, Y. Shen and G. V. Karanikolas, “Topology Identification and Learning over Graphs: Accounting for Nonlinearities and Dynamics,” in Proceedings of the IEEE, vol. 106, no. 5, pp. 787-807, May 2018, doi: 10.1109/JPROC.2018.2804318.</p>
+<p>[3] Yuxin Chen, “Alternating direction method of multipliers”, ELE 522: Large-Scale Optimization for Data Science, Princeton University, Fall 2019.</p>
+</div>
+<div class="section" id="smoothness-based-graph-topology-learning">
+<h2>Smoothness based Graph Topology Learning<a class="headerlink" href="#smoothness-based-graph-topology-learning" title="Permalink to this headline">¶</a></h2>
+<p>The following optimization problem is solved to obtain the adjacency matrix of the underlying
+graph topology.</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{W}^\ast = \underset{\mathbf{W} \in \mathcal{W}}{\mathrm{argmin }} \: \Vert \mathbf{W} \circ \mathbf{Z} \Vert_1 - \alpha \mathbf{1}^\top \log \mathbf{W}\mathbf{1} + \beta \Vert \mathbf{W} \Vert_F^2\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\mathcal{W} = \{ \mathbf{W} | \mathbf{W}_{ij} = \mathbf{W}_{ji} \geq 0, \text{diag} \{ \mathbf{W} \} = \mathbf{0} \}\)</span> is the set of valid adjacency matrices and
+<span class="math notranslate nohighlight">\(\mathbf{Z}_{ij} = \Vert \mathbf{y}_i - \mathbf{y}_j \Vert_2^2\)</span> is the pairwise distance matrix. Bigger the <span class="math notranslate nohighlight">\(\alpha\)</span>, the bigger the weights of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> and bigger the :math:’beta’, the denser the graph. Vectorizing this expression, we get,</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{w}^\ast = \underset{\mathbf{w} \in \mathbb{R}_+^K}{\mathrm{argmin }} \: \mathbb{1} \{ \mathbf{w} \geq \mathbf{0} \} + 2\mathbf{w}^\top \mathbf{z} - \alpha \mathbf{1}^\top \log \mathbf{d} + \beta \Vert \mathbf{w} \Vert_2^2\]</div>
+<p>where, <span class="math notranslate nohighlight">\(\mathbf{w}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{z}\)</span> contains the upper triangular (w.o the primary diagonal) elements of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> (therefore, <span class="math notranslate nohighlight">\(K = L(L-1)/2\)</span>).
+<span class="math notranslate nohighlight">\(\mathbf{d}\)</span> is the degree vector of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> such that <span class="math notranslate nohighlight">\(\mathbf{W} \mathbf{1} = \mathbf{S} \mathbf{w} = \mathbf{d}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is a fixed linear operator.</p>
+<p>The iterative steps of this optimization are clearly stated in [1].</p>
+<p><strong>References</strong></p>
+<p>[1] Vassilis Kalofolias, “How to Learn a Graph from Smooth Signals”, Proceedings of the 19th International Conference on Artificial Intelligence and Statistics, PMLR 51:920-929, 2016.</p>
 </div>
 </div>
 

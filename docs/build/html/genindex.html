@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -87,15 +90,14 @@
 <li class="toctree-l2"><a class="reference internal" href="graphlearn/methods.html">Graph Topology Learning Methods</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="graphlearn/methods.html#correlation-based-graph-topology-learning">Correlation based Graph Topology Learning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphlearn/methods.html#partial-correlation-based-graph-topology-learning">Partial Correlation based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphlearn/methods.html#sparse-inverse-covariance-graphical-lasso-based-graph-topology-learning">Sparse Inverse Covariance (Graphical Lasso) based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphlearn/methods.html#smoothness-based-graph-topology-learning">Smoothness based Graph Topology Learning</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="graphlearn/utilities.html">Graph Learning Utilities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="graphlearn/utilities.html#get-nodal-coordinates">Get Nodal Coordinates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphlearn/utilities.html#plot-multi-channel-signal-window">Plot Multi-Channel Signal Window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphlearn/utilities.html">Graph Learning Utilities</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="data_handling/utilities.html">Data Handling Utilities</a></li>
 </ul>
 
             
@@ -166,16 +168,33 @@
 
 <div class="genindex-jumpbox">
  <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
  
 </div>
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphlearn/methods.html#graph_learning.methods.CorrelationGraphLearn">CorrelationGraphLearn (class in graph_learning.methods)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_handling/utilities.html#data_handling.utils.create_dataset">create_dataset() (in module data_handling.utils)</a>
+</li>
+      <li><a href="graphlearn/utilities.html#graph_learning.utils.createWeightedGraph">createWeightedGraph() (in module graph_learning.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_handling/utilities.html#data_handling.utils.downsample">downsample() (in module data_handling.utils)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -186,6 +205,8 @@
       <li><a href="graphlearn/methods.html#graph_learning.methods.CorrelationGraphLearn.findGraph">findGraph() (graph_learning.methods.CorrelationGraphLearn method)</a>
 
       <ul>
+        <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn.findGraph">(graph_learning.methods.GraphicalLassoGraphLearn method)</a>
+</li>
         <li><a href="graphlearn/methods.html#graph_learning.methods.PartialCorrelationGraphLearn.findGraph">(graph_learning.methods.PartialCorrelationGraphLearn method)</a>
 </li>
       </ul></li>
@@ -197,14 +218,26 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphlearn/utilities.html#graph_learning.utils.getEllipticalCoordinates">getEllipticalCoordinates() (in module graph_learning.utils)</a>
 </li>
+      <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn.getFgamma">getFgamma() (graph_learning.methods.GraphicalLassoGraphLearn method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn.getSampleCovMatrix">getSampleCovMatrix() (graph_learning.methods.GraphicalLassoGraphLearn method)</a>
+</li>
+      <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn">GraphicalLassoGraphLearn (class in graph_learning.methods)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="graphlearn/methods.html#graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant">isRhoBarSignificant() (graph_learning.methods.PartialCorrelationGraphLearn method)</a>
+      <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn.isRhoBarSignificant">isRhoBarSignificant() (graph_learning.methods.GraphicalLassoGraphLearn method)</a>
+
+      <ul>
+        <li><a href="graphlearn/methods.html#graph_learning.methods.PartialCorrelationGraphLearn.isRhoBarSignificant">(graph_learning.methods.PartialCorrelationGraphLearn method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphlearn/methods.html#graph_learning.methods.CorrelationGraphLearn.isRhoSignificant">isRhoSignificant() (graph_learning.methods.CorrelationGraphLearn method)</a>
@@ -217,9 +250,29 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphlearn/methods.html#graph_learning.methods.PartialCorrelationGraphLearn">PartialCorrelationGraphLearn (class in graph_learning.methods)</a>
 </li>
+      <li><a href="data_handling/utilities.html#data_handling.utils.plot_recording">plot_recording() (in module data_handling.utils)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphlearn/utilities.html#graph_learning.utils.plotMultiChannelSignals">plotMultiChannelSignals() (in module graph_learning.utils)</a>
+</li>
+      <li><a href="data_handling/utilities.html#data_handling.utils.preprocess">preprocess() (in module data_handling.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data_handling/utilities.html#data_handling.utils.read_from_csv">read_from_csv() (in module data_handling.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphlearn/methods.html#graph_learning.methods.GraphicalLassoGraphLearn.softThresholding">softThresholding() (graph_learning.methods.GraphicalLassoGraphLearn method)</a>
 </li>
   </ul></td>
 </tr></table>

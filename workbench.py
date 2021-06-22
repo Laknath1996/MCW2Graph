@@ -27,130 +27,86 @@
 import os
 import numpy as np
 import scipy.io as sio
+from sklearn.manifold import TSNE
 
 # internal
-from graph_learning.utils import createWeightedGraph, unvectorize
+from graph_learning.methods import DiffusionGraphLearn, GraphicalLassoGraphLearn
+from graph_learning.utils import createWeightedGraph
+from data_handling.utils import create_dataset, plot_recording
+from tma.utils import plot_latent_space
 
-## load data
-dic = sio.loadmat('/Users/ashwin/Current Work/GRNNmyo/smoothautoregressgl_outputs_ashwin_2n.mat')
-X = dic['W']
-y = dic['y'].squeeze()
+#////// body //////
 
-Xc = X[y==0]
-w = np.mean(Xc, axis=0)
-W = unvectorize(w.squeeze())
-W = W + np.matmul(W, W)
-createWeightedGraph(W, semgConfig=True, title='Pointer - Trial 1 (Malsha)')
+## User Inputs
+id = "kushaba"
+s_id = 1
+labels = ["M_M", "R_R", "I_I", "L_L", "HC_"] # "T_I", "T_M", "T_R", "T_L", "I_M", "M_R", "R_L", "IMR", "MRL"]
+visualizeLearntGraphs = True
+visualizeLatentSpace = True
+L = 8
 
-# A = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]).T
-# print(A.view(3, 4, 2))
-# A = A.view(3, 4, 2)
-# print(A.reshape(3, 8))
+## Select the Graph Learning Method
+useJustMCW = False
+useGraphicalLassoGraphLearn = False
+useDiffusionGraphLearn = True
 
-# ## loading graph data
-# train_dataset = 'data/subject_1002_Malsha/graph_dataset_1.txt'
-# test_dataset = 'data/subject_1002_Malsha/graph_dataset_2.txt'
+## Create dataset
+X, y = create_dataset(id, s_id, labels)
 
-# trainData = load_graph_data(train_dataset)
+## collect the learnt the W matrices
+Ws = np.empty((0, 8, 8))
 
-# # # define data loaders
-# train_loader = DataLoader(trainData, batch_size=16, shuffle=True)
+if useJustMCW:
+    Ws = X
 
-# # # forward pass test 
-# print(trainData[0])
-# model = GCRNNGCN(1, 4, 8, 8, 5)
-# out = model(trainData[0])
-# print(out)
+if useDiffusionGraphLearn:
+    # hyperparams
+    p = 5
+    beta_1 = 10
+    beta_2 = 0.1
 
-# for data in train_loader:
-#     print(data)
-#     out = model(data)
-#     print(out)
+    for i in range(X.shape[0]):
+        GL = DiffusionGraphLearn(
+            1000*X[i],
+            p=p, 
+            beta_1=beta_1,
+            beta_2=beta_2,
+            verbosity=True
+        )
+        W = GL.findGraphLaplacian()
+        Ws = np.vstack((Ws, np.expand_dims(W, 0)))
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(int(y[i])))
+        print('Graph {:n} : Completed!'.format(i+1))
 
-# train the network
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if useGraphicalLassoGraphLearn:
+    # hyperparams
+    beta = 0.5
+    gamma = 0.0001
+    imax = 2000
+    epsilon = 0.01
+    alpha = 0.05
 
-# model = GCRNNMLP(1, 1, 8, 5)
-# optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
+    for i in range(X.shape[0]):
+        GL = GraphicalLassoGraphLearn(
+            X=10000*X[i],
+            beta=beta,
+            gamma=gamma,
+            imax=imax,
+            epsilon=epsilon,
+            alpha=alpha,
+            verbosity=False
+        )
+        W = GL.findGraph()
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(labels[int(y[i])]))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))
 
-# model.train()
-# for epoch in range(20):
-#     running_loss = 0.0
-
-#     for i, data in enumerate(data_list, 0):
-#         optimizer.zero_grad()
-#         out = model(data)
-#         loss = F.cross_entropy(out.unsqueeze(0), data.y)
-#         loss.backward()
-#         optimizer.step()
-
-#         running_loss += loss.item()
-#         if i % 10 == 0:
-#             print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 10))
-#             running_loss = 0.0
-
-# print('Finished Traning!')
-
-# # # evaluate model
-# model.eval()
-
-# with torch.no_grad():
-#     correct = 0
-#     num = 0
-#     for data in test_loader:
-#         _, pred = model(data).max(dim=1)
-#         correct += int(pred.eq(data.y).sum().item())
-#         num += int(len(data.y))
-
-# acc = correct / num
-# print('Accuracy : {:.4f}'.format(acc))
-
-# # save model
-# torch.save(model.state_dict(), 'models/model_grnn.pt')
-
-#/////////////// extra /////////////////
-
-# # define the network
-# class Net(torch.nn.Module):
-#     def __init__(self):
-#         super(Net, self).__init__()
-#         self.conv1 = ChebConv(80, 16, K=2)
-#         self.conv2 = ChebConv(16, 32, K=2)
-#         self.conv3 = ChebConv(32, 64, K=2)
-#         self.fc1 = nn.Linear(64, 100)
-#         self.fc2 = nn.Linear(100, 20)
-#         self.fc3 = nn.Linear(20, 5)
-
-#     def forward(self, data):
-#         batch_size = len(data.y)
-#         x, edge_index, edge_weight = data.x, data.edge_index, data.edge_attr
-#         x = F.relu(self.conv1(x, edge_index, edge_weight))
-#         x = F.relu(self.conv2(x, edge_index, edge_weight))
-#         x = F.relu(self.conv3(x, edge_index, edge_weight))
-#         x = global_add_pool(x, data.batch, size=batch_size)
-#         x = F.dropout(x, training=self.training)
-#         x = self.fc1(x)
-#         x = self.fc2(x)
-#         x = self.fc3(x)
-
-#         return F.log_softmax(x, dim=1)
-
-# # define GRNN
-# class MyoNet(torch.nn.Module):
-#     def __init__(self):
-#         super(MyoNet, self).__init__()
-#         self.grnn = GRNN(256)
-#         self.gconv1 = ChebConv(80, 40, K=2)
-#         self.gconv2 = ChebConv(40, 20, K=2)
-#         self.fc = nn.Linear(20, 5)
-
-#     def forward(self, data):
-#         batch_size = len(data.y)
-#         x, edge_index, edge_weight = data.x, data.edge_index, data.edge_attr
-#         x = self.grnn(x, edge_index)
-#         x = F.relu(self.gconv1(x, edge_index, edge_weight))
-#         x = F.relu(self.gconv2(x, edge_index, edge_weight))
-#         x = global_add_pool(x, data.batch, size=batch_size)
-#         x = self.fc(x)
-
-#         return F.log_softmax(x, dim=1)
+## Visualize the Latent Space
+if visualizeLatentSpace:
+    if useJustMCW:
+        Xr = TSNE(n_components=2, perplexity=60).fit_transform(Ws.reshape(Ws.shape[0], L*80)) 
+    else:   
+        Xr = TSNE(n_components=2, perplexity=60).fit_transform(Ws.reshape(Ws.shape[0], L*L))
+    plot_latent_space(Xr, y, labels=labels)

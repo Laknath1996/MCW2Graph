@@ -35,8 +35,8 @@ The code is based on the following paper :
 from keras.models import Sequential, load_model
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Activation, Flatten
-from keras.optimizers import sgd, Adam
-from keras.engine import InputLayer
+from keras.optimizers import SGD, Adam
+from keras.layers import InputLayer
 
 
 def cnn(shape, no_classes):
@@ -62,11 +62,11 @@ def cnn(shape, no_classes):
     if no_classes > 2:
         model.add(Dense(no_classes))
         model.add(Activation('softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer=sgd(lr=0.01), metrics=['categorical_accuracy'])
+        model.compile(loss='categorical_crossentropy', optimizer=SGD(lr=0.01), metrics=['categorical_accuracy'])
     else:
         model.add(Dense(no_classes - 1))
         model.add(Activation('sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer=sgd(lr=0.01), metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=SGD(lr=0.01), metrics=['accuracy'])
 
     return model
 
@@ -86,6 +86,6 @@ def nn(shape, no_classes):
     model.add(Dense(no_classes))
     model.add(Activation('softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer=sgd(lr=0.01), metrics=['categorical_accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=SGD(lr=0.01), metrics=['categorical_accuracy'])
 
     return model

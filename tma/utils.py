@@ -64,7 +64,7 @@ def plot_latent_space(X_reduced, y_train, labels):
 
     plt.xlabel('Dim 1')
     plt.ylabel('DIm 2')
-    plt.legend(tuple(labels), loc='lower right')
+    plt.legend(tuple(labels))
     plt.show()
 
 
@@ -77,11 +77,10 @@ def plot_recording(data, fs):
     num_samples = data.shape[0]
     print(num_channels)
     axes = [fig.add_subplot('%i1' % num_channels + str(i)) for i in range(0, num_channels)]
-    [(ax.set_ylim([-100, 100])) for ax in axes]
+    # [(ax.set_ylim([-100, 100])) for ax in axes]
     t = np.array(list(range(num_samples))) / fs
-    i = 0
-    for ax in axes:
-        ax.plot(t, data[:, i])
+    for i in range(num_channels):
+        axes[i].plot(t, data[:, i])
         i += 1
     plt.show()
 

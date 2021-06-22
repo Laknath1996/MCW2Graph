@@ -27,12 +27,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.sparse import data
 from sklearn.manifold import TSNE
+from scipy.linalg import eig
 import scipy.io as sio
 
 # internal 
 from tma.utils import load_tma_data, plot_latent_space
 from graph_learning.methods import SmoothAutoregressGraphLearn, SmoothSignalGraphLearn, AutoregressGraphLearn, CorrelationGraphLearn
-from graph_learning.methods import PartialCorrelationGraphLearn
+from graph_learning.methods import PartialCorrelationGraphLearn, GraphicalLassoGraphLearn
+from graph_learning.methods import StructualEqnModelGraphLearn, SVARMGraphLearn
+from graph_learning.methods import DiffusionGraphLearn
 from graph_learning.utils import createWeightedGraph, plotMultiChannelSignals, rescaleMCW
 
 # ////// body ///// 
@@ -41,41 +44,59 @@ from graph_learning.utils import createWeightedGraph, plotMultiChannelSignals, r
 #//////////////////
 
 # multi-channel dataset
-data_path = 'data/subject_1001_Ashwin/trans_map_dataset_3.h5'
+data_path = 'data/subject_1001_Ashwin/trans_map_dataset_2.h5'
 class_labels = ['Middle_Flexion', 'Ring_Flexion', 'Hand_Closure', 'V_Flexion','Pointer']
-dataset_type = "test"
+dataset_type = "train"
 
 # graph dataset
-graph_data_path = 'graph_data/subject_1001_Ashwin'
+graph_data_path = 'graph_data/subject_1004_Ahwin'
 
 # method
+useJustMCW = False
+useTMAmaps = False
 useCorrelationGraphLearn = False
-usePartialCorrelationGraphLearn = True
+usePartialCorrelationGraphLearn = False
+useGraphicalLassoGraphLearn = False
+useStructualEqnModelGraphLearn = False
+useSVARMGraphLearn = False
 useSmoothAutoregressGraphLearn = False
 useSmoothSignalGraphLearn = False
+useAutoregressiveGraphLearn = False
+useDiffusionGraphLearn = True
 
 # hyperparameters
-alpha=0.05
-beta=20 
-gamma=0.01 
+verbosity=False     # verbosity flag
 
 # visualize
-visualizeLearntGraphs = False 
+visualizeLearntGraphs = False
 visualizeLatentSpace = True
 
 #//////////////////
 
 ## loading the TMA map data
-X, y = load_tma_data(data_path)
+X_tma, y = load_tma_data(data_path)
 
 ## extracting the first order terms of each TMA map.
-X = X[:, :8, :]     # the multi-channel envelopes (8-channels of myo armband)  
+X = X_tma[:, :8, :]     # the multi-channel envelopes (8-channels of myo armband)
+X = X[y==4]
 L = X.shape[1]      # number of channels
 
 ## learn the graph
 Ws = np.empty((0, L, L))
 
+## Just the Multi-channle window
+if useJustMCW:
+    Ws = X
+
+## TMA Maps
+if useTMAmaps:
+    Ws = X_tma
+
+## Correlation based graph topology learning
 if useCorrelationGraphLearn:
+    # hyperparams
+    alpha = 0.05
+
     method_id = "correlation"
     print("Method : {}".format(method_id))
     for i in range(X.shape[0]):
@@ -85,11 +106,15 @@ if useCorrelationGraphLearn:
         )
         W = GL.findGraph()
         if visualizeLearntGraphs:
-            createWeightedGraph(W, False, "Class : {}".format(class_labels[int(y[i])]))
+            createWeightedGraph(W, "Class : {}".format(class_labels[int(y[i])]))
         Ws = np.vstack((Ws, W.reshape(1, L, L)))
         print('Graph {:n} : Completed!'.format(i+1))
 
+## Partial correlation based graph topology learning
 if usePartialCorrelationGraphLearn:
+    # hyperparams
+    alpha = 0.05
+
     method_id = "partial_correlation"
     print("Method : {}".format(method_id))
     for i in range(X.shape[0]):
@@ -99,10 +124,105 @@ if usePartialCorrelationGraphLearn:
         )
         W = GL.findGraph()
         if visualizeLearntGraphs:
-            createWeightedGraph(W, False, "Class : {}".format(class_labels[int(y[i])]))
+            createWeightedGraph(W, "Class : {}".format(class_labels[int(y[i])]))
         Ws = np.vstack((Ws, W.reshape(1, L, L)))
         print('Graph {:n} : Completed!'.format(i+1))
 
+## Graphical lasso based graph topology learning
+if useGraphicalLassoGraphLearn:
+    # hyperparams
+    beta = 0.5
+    gamma = 0.0001
+    imax = 2000
+    epsilon = 0.01
+    alpha = 0.05
+
+    method_id = "graphical_lasso"
+    print("Method : {}".format(method_id))
+    for i in range(X.shape[0]):
+        GL = GraphicalLassoGraphLearn(
+            X=X[i],
+            beta=beta,
+            gamma=gamma,
+            imax=imax,
+            epsilon=epsilon,
+            alpha=alpha,
+            verbosity=verbosity
+        )
+        W = GL.findGraph()
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(class_labels[int(y[i])]))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))
+
+## Structural Equation Modelling based Graph Learning
+if useStructualEqnModelGraphLearn:
+    method_id = "sem"
+    print("Method : {}".format(method_id))
+    for i in range(X.shape[0]):
+        GL = StructualEqnModelGraphLearn(
+            X=rescaleMCW(X[i]),
+            beta=beta,
+            gamma=gamma,
+            imax=imax,
+            epsilon=epsilon,
+            verbosity=verbosity
+        )
+        W = GL.findGraph()
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(class_labels[int(y[i])]))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))  
+
+## SVARM based Graph Learning
+if useSVARMGraphLearn:
+    method_id = "svarm"
+    print("Method : {}".format(method_id))
+    for i in range(X.shape[0]):
+        GL = SVARMGraphLearn(
+            X=rescaleMCW(X[i]),
+            beta=beta,
+            p=p,
+            gamma=gamma,
+            imax=imax,
+            epsilon=epsilon,
+            verbosity=verbosity
+        )
+        W = GL.findGraph()
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(class_labels[int(y[i])]))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))   
+
+## Smooth Signal Graph Learning
+if useSmoothSignalGraphLearn:
+    # hyperparams
+    beta = 5
+    alpha = 3
+    gamma = 0.01
+    imax = 2000
+    epsilon = 0.0001
+
+    method_id = "smoothSignal"
+    print("Method : {}".format(method_id))
+    for i in range(X.shape[0]):
+        GL = SmoothSignalGraphLearn(
+            X[i], 
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+            epsilon=epsilon,
+            imax=imax,
+            verbosity=verbosity
+        )
+        W = GL.findGraph()
+        W[W <= 1e-5] = 0
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(int(y[i])))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))
+
+# Smoothness + Autoregression (not using)
 if useSmoothAutoregressGraphLearn:
     method_id = "smoothAutoregression"
     print("Method : {}".format(method_id))
@@ -110,7 +230,10 @@ if useSmoothAutoregressGraphLearn:
         GL = SmoothAutoregressGraphLearn(
             rescaleMCW(X[i]), 
             beta=beta,
-            gamma=gamma
+            gamma=gamma,
+            epsilon=epsilon,
+            imax=imax,
+            verbosity=verbosity
         )
         W = GL.findGraph()
         W[W <= 1e-5] = 0
@@ -119,26 +242,58 @@ if useSmoothAutoregressGraphLearn:
         Ws = np.vstack((Ws, W.reshape(1, L, L)))
         print('Graph {:n} : Completed!'.format(i+1))
 
-if useSmoothSignalGraphLearn:
-    method_id = "smoothSignal"
+## SVAR based Graph Learning (not using)
+if useAutoregressiveGraphLearn:
+    method_id = "autoreg"
     print("Method : {}".format(method_id))
     for i in range(X.shape[0]):
-        GL = SmoothSignalGraphLearn(
+        GL = AutoregressGraphLearn(
             rescaleMCW(X[i]), 
-            alpha=alpha,
             beta=beta,
-            gamma=gamma
+            gamma=gamma,
+            delta=delta,
+            epsilon=epsilon,
+            imax=imax,
+            verbosity=verbosity
         )
         W = GL.findGraph()
-        W[W <= 1e-5] = 0
+        if visualizeLearntGraphs:
+            createWeightedGraph(W, "Class : {}".format(int(y[i])))
+        Ws = np.vstack((Ws, W.reshape(1, L, L)))
+        print('Graph {:n} : Completed!'.format(i+1))
+
+## Diffusion based Graph Learning
+if useDiffusionGraphLearn:
+    beta_1 = 10
+    beta_2 = 0.1
+    p = 5
+
+    method_id = "diffusion"
+    print("Method : {}".format(method_id))
+    for i in range(X.shape[0]):
+        GL = DiffusionGraphLearn(
+            X[i],
+            p=p, 
+            beta_1=beta_1,
+            beta_2=beta_2,
+            verbosity=verbosity
+        )
+        # W = GL.findGraph()
+        W = GL.findGraphLaplacian()
+        # W = GL.findDiffusionProcess()
         if visualizeLearntGraphs:
             createWeightedGraph(W, "Class : {}".format(int(y[i])))
         Ws = np.vstack((Ws, W.reshape(1, L, L)))
         print('Graph {:n} : Completed!'.format(i+1))
 
 if visualizeLatentSpace:
-        Xr = TSNE(n_components=2, perplexity=50).fit_transform(Ws.reshape(Ws.shape[0], L*L))
-        plot_latent_space(Xr, y, labels=class_labels)
+    if useJustMCW:
+        Xr = TSNE(n_components=2, perplexity=60).fit_transform(Ws.reshape(Ws.shape[0], L*80))
+    elif useTMAmaps:
+        Xr = TSNE(n_components=2, perplexity=60).fit_transform(Ws.reshape(Ws.shape[0], 44*80))        
+    else:
+        Xr = TSNE(n_components=2, perplexity=60).fit_transform(Ws.reshape(Ws.shape[0], L*L))
+    plot_latent_space(Xr, y, labels=class_labels)
 
 ## save
 if input("Save Graph Data? (y/n) : ") == "y":

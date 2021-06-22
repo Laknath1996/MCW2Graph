@@ -56,7 +56,7 @@ class GraphConvRNN(torch.nn.Module):
         # recurrent forward computation : h_t = \sigma( A(S) * x_t + B(S) * h_{t-1}
         h = h0
         for t in range(T): 
-            h = self.A(x.select(-1, t).view(N, 1), edge_index, edge_weight) + self.B(h, edge_index, edge_weight)
+            h = self.A(x.select(-1, t).view(N, 1).float(), edge_index, edge_weight.float()) + self.B(h.float(), edge_index, edge_weight.float())
             h = torch.sigmoid(h)
             H = torch.cat([H, h], 1) # get the [h_t, h_{t-1},..., h_1] sequence
         
@@ -130,9 +130,9 @@ class GCRNNGCN(torch.nn.Module):
         h0 = self.init_hidden(batchSize)                                # initialize h_0
         H = self.gcrnn(X, h0)                                           # GCRNN layer
         h_t = H.narrow(1,-self.hiddenChannels, self.hiddenChannels)     # obtain h_t from the GCRNN output sequence
-        z_t = self.phi1(h_t, edge_index, edge_weight)                   # Graph Conv layer
+        z_t = self.phi1(h_t.float(), edge_index, edge_weight.float())                   # Graph Conv layer
         z_t = F.relu(z_t)                                               # ReLU
-        z_t = self.phi2(z_t, edge_index, edge_weight)                   # Graph Conv layer
+        z_t = self.phi2(z_t.float(), edge_index, edge_weight.float())                   # Graph Conv layer
         z_t = F.relu(z_t)                                               # ReLU
         z_t = z_t.view(batchSize, self.numNodes, int(self.outChannels/2))    # Rearrange
         z_t = z_t.view(batchSize,  int(self.numNodes * self.outChannels/2))  # flatten

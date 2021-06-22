@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Data Handling Utilities &mdash; MCW2Graph  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Graph Learning Utilities" href="../graphlearn/utilities.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MCW2Graph
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../graphlearn/index.html">Graph Learning</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../graphlearn/methods.html">Graph Topology Learning Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../graphlearn/methods.html#correlation-based-graph-topology-learning">Correlation based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../graphlearn/methods.html#partial-correlation-based-graph-topology-learning">Partial Correlation based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../graphlearn/methods.html#sparse-inverse-covariance-graphical-lasso-based-graph-topology-learning">Sparse Inverse Covariance (Graphical Lasso) based Graph Topology Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../graphlearn/methods.html#smoothness-based-graph-topology-learning">Smoothness based Graph Topology Learning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../graphlearn/utilities.html">Graph Learning Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Handling Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCW2Graph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Data Handling Utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/data_handling/utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-handling-utilities">
+<h1>Data Handling Utilities<a class="headerlink" href="#data-handling-utilities" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="data_handling.utils.read_from_csv">
+<span class="sig-prename descclassname"><span class="pre">data_handling.utils.</span></span><span class="sig-name descname"><span class="pre">read_from_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data_handling.utils.read_from_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the multi-channl data from .csv files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_id</strong> (<em>str</em>) – A unique identifier allocated for each mulit-channel dataset</p></li>
+<li><p><strong>file</strong> (<em>str</em>) – The path to the .csv file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The multi-channel data with the shape (num_channels, num_samples)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_handling.utils.downsample">
+<span class="sig-prename descclassname"><span class="pre">data_handling.utils.</span></span><span class="sig-name descname"><span class="pre">downsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data_handling.utils.downsample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downsample a mulit-channel lsignal by the given factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy array</em>) – Multi-channl signals of the shape (num_channels, num_samples)</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling freqeuncy of the multi-channel signals</p></li>
+<li><p><strong>factor</strong> (<em>list</em>) – decimating factors as a list. For example if the decimating factor is 20, then
+factor = [4, 5]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy array</em>) – decimated multi-channel signals</p></li>
+<li><p><strong>fs_new</strong> (<em>float</em>) – new sampling frequency after decimation</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_handling.utils.preprocess">
+<span class="sig-prename descclassname"><span class="pre">data_handling.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lpfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data_handling.utils.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preprocess the mulit-channel signals by first rectifying and then low pass filtering
+the signals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy array</em>) – Multi-channel signal data of shape (num_channels, num_samples)</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling frequency</p></li>
+<li><p><strong>lpfreq</strong> (<em>int</em><em>, </em><em>optional</em>) – Low pass cut off frequency in Hz, by default 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>filt_data</strong> – Preprocessed multi-channel signals</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_handling.utils.plot_recording">
+<span class="sig-prename descclassname"><span class="pre">data_handling.utils.</span></span><span class="sig-name descname"><span class="pre">plot_recording</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data_handling.utils.plot_recording" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the multi-channl signals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy array</em>) – Multi-channl signals of shape (num_channels, num_samples)</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling frequency</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_handling.utils.create_dataset">
+<span class="sig-prename descclassname"><span class="pre">data_handling.utils.</span></span><span class="sig-name descname"><span class="pre">create_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data_handling.utils.create_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the datasent of multi-channel windows and their respecitve labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_id</strong> (<em>str</em>) – A unique identifier allocated for each mulit-channel dataset</p></li>
+<li><p><strong>subject_id</strong> (<em>str</em>) – A unique identifier allocated for each subject</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – An array including the file names of the .csv files containing the multi-channel signals</p></li>
+<li><p><strong>num_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of channels, by default 8</p></li>
+<li><p><strong>num_samples</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of samples per each multi-channel window, by default 80</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy array</em>) – An array of the shape (num_windows, num_channels, num_samples) that includes the
+multi-channel windows</p></li>
+<li><p><strong>y</strong> (<em>numpy array</em>) – An array of the size (num_windows, ) that includes the labels of each multi-channel
+window</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../graphlearn/utilities.html" class="btn btn-neutral float-left" title="Graph Learning Utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Ashwin De Silva.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

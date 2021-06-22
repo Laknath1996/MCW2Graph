@@ -4,12 +4,8 @@ Graph Learning Utilities
 
 .. currentmodule:: graph_learning.utils
 
-Get Nodal Coordinates
------------------------
-
 .. autofunction:: getEllipticalCoordinates
 
-Plot Multi-Channel Signal Window
----------------------------------
-
 .. autofunction:: plotMultiChannelSignals
+
+.. autofunction:: createWeightedGraph
