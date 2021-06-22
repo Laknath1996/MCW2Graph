@@ -178,10 +178,13 @@ where, :math:`\mathcal{W} = \{ \mathbf{W} | \mathbf{W}_{ij} = \mathbf{W}_{ji} \g
 .. math::
     \mathbf{w}^\ast = \underset{\mathbf{w} \in \mathbb{R}_+^K}{\mathrm{argmin }} \: \mathbb{1} \{ \mathbf{w} \geq \mathbf{0} \} + 2\mathbf{w}^\top \mathbf{z} - \alpha \mathbf{1}^\top \log \mathbf{d} + \beta \Vert \mathbf{w} \Vert_2^2
 
-where, :math:`\mathbf{w}` and :math:`\mathbf{z}` contains the upper triangular (w.o the primary diagonal) elements of :math:`\mathbf{W}` and :math:`\mathbf{Z}` (therefore, :math:`K = L(L-1)/2`).
+where, :math:`\mathbf{w}` and :math:`\mathbf{z}` contains the upper triangular (w.o the primary diagonal) elements of :math:`\mathbf{W}` and :math:`\mathbf{Z}` (therefore, :math:`K = L(L-1)/2`.
 :math:`\mathbf{d}` is the degree vector of :math:`\mathbf{W}` such that :math:`\mathbf{W} \mathbf{1} = \mathbf{S} \mathbf{w} = \mathbf{d}`, where :math:`\mathbf{S}` is a fixed linear operator. 
 
 The iterative steps of this optimization are clearly stated in [1].
+
+.. autoclass:: SmoothSignalGraphLearn
+    :members:
 
 **References**
         

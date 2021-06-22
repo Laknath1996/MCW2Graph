@@ -29,8 +29,8 @@ from numpy.lib.index_tricks import fill_diagonal
 from scipy.stats import t
 from scipy.linalg import khatri_rao, eig
 from cvxopt import matrix, solvers
-from l1regls import l1regls
-from l1 import l1
+from optimizers.l1regls import l1regls
+from optimizers.l1 import l1
 
 # internal 
 
@@ -515,9 +515,28 @@ class SVARMGraphLearn:
         return Wp
 
 class SmoothSignalGraphLearn:
-    """
-    Primal dual algorithm for learning graphs on smooth signals
-    """
+    """Executes the smooothness based graph learning algorithm proposed by 
+        Kalofolias et al (2016).
+
+        Parameters
+        ----------
+        X : numpy array
+            Multi-channel signal window of shape (num_channels, num_samples)
+        alpha : float
+            The parameter that regulates the overall connectivity of the graph. Bigger the
+            alpha, better the connectivity.
+        beta : float
+            The parameter that regulates the density of the graph. Bigger the beta, the denser
+            the graph
+        gamma : float
+            Step size of the iterative algorithm
+        epsilon : tolerance, optional
+            Tolerance that determines the termination of the iterative algorithm, by default 1e-4
+        imax : int, optional
+            maximum number of iterations, by default 2000
+        verbosity : bool, optional
+            If True, the conergence parameters would be printed, by default True
+        """
     def __init__(self, X, alpha, beta, gamma, epsilon=1e-4, imax=2000, verbosity=True):
         super(SmoothSignalGraphLearn, self).__init__()
         self.X = X
@@ -533,10 +552,12 @@ class SmoothSignalGraphLearn:
         self.N = X.shape[1]
 
     def getPairwiseDistanceMatrix(self):
-        """
-        compute the pairwise distance matrix $Z \in \mathbb{R}^{m \times m}$ 
-        of the observations matrix $X \in \mathbb{R}^{m \times n}$ as defined below.
-        $$ Z_{i, j} = || x_i - x_j ||^2 $$
+        """Computes the pairwise distances matrix Z from X.
+
+        Returns
+        -------
+        Z : numpy array
+            The pairwise distances matrix of the multi-channel signal window.
         """
         X = self.X
         m = self.m
@@ -547,6 +568,13 @@ class SmoothSignalGraphLearn:
         return Z
 
     def getPairwiseSecantDistanceMatrix(self):
+        """Computes the pairwise secant distances matrix Z from X.
+
+        Returns
+        -------
+         Z : numpy array
+            The pairwise secant distances matrix of the multi-channel signal window.
+        """
         X = self.X
         m = self.m
         Z = np.zeros((m, m))
@@ -556,18 +584,38 @@ class SmoothSignalGraphLearn:
         return Z
 
     def vectorize(self, Y):
-        """
-        Form an array $y \in \mathbb{m(m-1)/2}$ that only contains the upper 
-        traingle indices of the input matrix $Y \in \mathbb{R}^{m \times m}$
+        """Form a vector that contains only the elements of the upper triangle (exclduing
+        the main diagonal) of a matrix
+
+        Parameters
+        ----------
+        Y : numpy array
+            Input square matrix
+
+        Returns
+        -------
+        numpy array
+            Vector that contains only the elements of the upper triangle (exclduing
+        the main diagonal) of Y
         """
         m = self.m
         idx = np.triu_indices(m, 1)
         return Y[idx]
 
     def unvectorize(self, y):
-        """
-        Form a symmetrical matrix $Y \in \mathbb{R}^{m \times m}$ where
-        diag(Y) = 0 given an array $y \in \mathbb{m(m-1)/2}$
+        """Given a vector that contains only the elements of the upper triangle (excluding 
+        the main diagonal), this function obtains the corresponding matrix
+
+        Parameters
+        ----------
+        y : numpy array
+            Vector that contains only the elements of the upper triangle (exclduing
+        the main diagonal) of Y
+
+        Returns
+        -------
+        Y : numpy array
+            Corresponding matrix of y
         """
         m = self.m
         Y = np.zeros((m, m))
@@ -577,6 +625,13 @@ class SmoothSignalGraphLearn:
         return Y
 
     def getLinearOperator(self):
+        """Obtains the linear operator S such that W 1 = S w.
+
+        Returns
+        -------
+        S : numpy array
+            The linear operator which satistifies W 1 = S w
+        """
         m = self.m
         n = int(m*(m-1)/2)
         S = np.zeros((m, n))
@@ -589,9 +644,13 @@ class SmoothSignalGraphLearn:
         return S
 
     def findGraph(self):
-        """
-        Run the primal dual algorithm for the following model : 
-        $$ \min_{W \in \mathcal{W}_m} || W \circ X ||_{1, 1} - \alpha \bm{1}^\top \log (W \bm{1}) + \beta ||W||_F^2 $$
+        """Runs the primal-dual algorithm to solve the optimization problem stated in
+        Kalofolias et al (2016)
+
+        Returns
+        -------
+        W : numpy array
+            Learnt adjacency matrix of the multi-channel signal window
         """
         # vectorized pairwise distance matrix
         Z = self.getPairwiseDistanceMatrix()

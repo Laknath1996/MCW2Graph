@@ -101,6 +101,7 @@
 <li class="toctree-l2"><a class="reference internal" href="utilities.html">Graph Learning Utilities</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../data_handling/utilities.html">Data Handling Utilities</a></li>
 </ul>
 
             
@@ -483,9 +484,128 @@ graph topology.</p>
 <span class="math notranslate nohighlight">\(\mathbf{Z}_{ij} = \Vert \mathbf{y}_i - \mathbf{y}_j \Vert_2^2\)</span> is the pairwise distance matrix. Bigger the <span class="math notranslate nohighlight">\(\alpha\)</span>, the bigger the weights of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> and bigger the :math:’beta’, the denser the graph. Vectorizing this expression, we get,</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{w}^\ast = \underset{\mathbf{w} \in \mathbb{R}_+^K}{\mathrm{argmin }} \: \mathbb{1} \{ \mathbf{w} \geq \mathbf{0} \} + 2\mathbf{w}^\top \mathbf{z} - \alpha \mathbf{1}^\top \log \mathbf{d} + \beta \Vert \mathbf{w} \Vert_2^2\]</div>
-<p>where, <span class="math notranslate nohighlight">\(\mathbf{w}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{z}\)</span> contains the upper triangular (w.o the primary diagonal) elements of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> (therefore, <span class="math notranslate nohighlight">\(K = L(L-1)/2\)</span>).
+<p>where, <span class="math notranslate nohighlight">\(\mathbf{w}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{z}\)</span> contains the upper triangular (w.o the primary diagonal) elements of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> (therefore, <span class="math notranslate nohighlight">\(K = L(L-1)/2\)</span>.
 <span class="math notranslate nohighlight">\(\mathbf{d}\)</span> is the degree vector of <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> such that <span class="math notranslate nohighlight">\(\mathbf{W} \mathbf{1} = \mathbf{S} \mathbf{w} = \mathbf{d}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is a fixed linear operator.</p>
 <p>The iterative steps of this optimization are clearly stated in [1].</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">graph_learning.methods.</span></span><span class="sig-name descname"><span class="pre">SmoothSignalGraphLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the smooothness based graph learning algorithm proposed by
+Kalofolias et al (2016).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy array</em>) – Multi-channel signal window of shape (num_channels, num_samples)</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – The parameter that regulates the overall connectivity of the graph. Bigger the
+alpha, better the connectivity.</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – The parameter that regulates the density of the graph. Bigger the beta, the denser
+the graph</p></li>
+<li><p><strong>gamma</strong> (<em>float</em>) – Step size of the iterative algorithm</p></li>
+<li><p><strong>epsilon</strong> (<em>tolerance</em><em>, </em><em>optional</em>) – Tolerance that determines the termination of the iterative algorithm, by default 1e-4</p></li>
+<li><p><strong>imax</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of iterations, by default 2000</p></li>
+<li><p><strong>verbosity</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the conergence parameters would be printed, by default True</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.findGraph">
+<span class="sig-name descname"><span class="pre">findGraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.findGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the primal-dual algorithm to solve the optimization problem stated in
+Kalofolias et al (2016)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>W</strong> – Learnt adjacency matrix of the multi-channel signal window</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.getLinearOperator">
+<span class="sig-name descname"><span class="pre">getLinearOperator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.getLinearOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the linear operator S such that W 1 = S w.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>S</strong> – The linear operator which satistifies W 1 = S w</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.getPairwiseDistanceMatrix">
+<span class="sig-name descname"><span class="pre">getPairwiseDistanceMatrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.getPairwiseDistanceMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the pairwise distances matrix Z from X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Z</strong> – The pairwise distances matrix of the multi-channel signal window.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.getPairwiseSecantDistanceMatrix">
+<span class="sig-name descname"><span class="pre">getPairwiseSecantDistanceMatrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.getPairwiseSecantDistanceMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the pairwise secant distances matrix Z from X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Z</strong> – The pairwise secant distances matrix of the multi-channel signal window.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.unvectorize">
+<span class="sig-name descname"><span class="pre">unvectorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.unvectorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a vector that contains only the elements of the upper triangle (excluding
+the main diagonal), this function obtains the corresponding matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>numpy array</em>) – Vector that contains only the elements of the upper triangle (exclduing</p></li>
+<li><p><strong>main diagonal</strong><strong>) </strong><strong>of Y</strong> (<em>the</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Y</strong> – Corresponding matrix of y</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graph_learning.methods.SmoothSignalGraphLearn.vectorize">
+<span class="sig-name descname"><span class="pre">vectorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graph_learning.methods.SmoothSignalGraphLearn.vectorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Form a vector that contains only the elements of the upper triangle (exclduing
+the main diagonal) of a matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Y</strong> (<em>numpy array</em>) – Input square matrix</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy array</em> – Vector that contains only the elements of the upper triangle (exclduing</p></li>
+<li><p><em>the main diagonal) of Y</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <p><strong>References</strong></p>
 <p>[1] Vassilis Kalofolias, “How to Learn a Graph from Smooth Signals”, Proceedings of the 19th International Conference on Artificial Intelligence and Statistics, PMLR 51:920-929, 2016.</p>
 </div>
