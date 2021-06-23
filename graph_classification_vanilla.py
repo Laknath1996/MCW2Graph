@@ -65,11 +65,11 @@ class Net(torch.nn.Module):
         return x
 
 ## load data
-dic1 = sio.loadmat('graph_data/subject_1007_Jathu/diffusion_train_graph_topologies.mat')
+dic1 = sio.loadmat('graph_data/de_silva/subject_1007_Jathu/diffusion_train_graph_topologies.mat')
 X1 = dic1['W']
 y1 = dic1['y'].squeeze()
 
-dic2 = sio.loadmat('graph_data/subject_1007_Jathu/diffusion_test_graph_topologies.mat')
+dic2 = sio.loadmat('graph_data/de_silva/subject_1007_Jathu/diffusion_test_graph_topologies.mat')
 X2 = dic2['W']
 y2 = dic2['y'].squeeze()
 

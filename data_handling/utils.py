@@ -163,7 +163,7 @@ def create_dataset(dataset_id, subject_id, labels, num_channels=8, num_samples=8
         window
     """
     if dataset_id == "kushaba":
-        dataset_path = "data/Delsys_8Chans_15Classes"
+        dataset_path = "data/kushaba"
         subject_folder = "S{}-Delsys-15Class".format(subject_id)
         X = np.empty((0, num_channels, num_samples))
         y = np.empty((0, ))

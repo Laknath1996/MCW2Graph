@@ -44,12 +44,12 @@ from graph_learning.utils import createWeightedGraph, plotMultiChannelSignals, r
 #//////////////////
 
 # multi-channel dataset
-data_path = 'data/subject_1001_Ashwin/trans_map_dataset_2.h5'
+data_path = 'data/de_silva/subject_1001_Ashwin/trans_map_dataset_2.h5'
 class_labels = ['Middle_Flexion', 'Ring_Flexion', 'Hand_Closure', 'V_Flexion','Pointer']
 dataset_type = "train"
 
 # graph dataset
-graph_data_path = 'graph_data/subject_1004_Ahwin'
+graph_data_path = 'graph_data/de_silva/subject_1004_Ashwin'
 
 # method
 useJustMCW = False

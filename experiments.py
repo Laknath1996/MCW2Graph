@@ -54,17 +54,17 @@ graphLearnGCNMethod = False      # 4 : Multi-Channel WIndow + Graph Learning + G
 ## datasets
 
 if tmacnnMethod:
-    train_dataset = 'data/subject_1006_Ramith/trans_map_dataset_1.h5'
-    test_dataset = 'data/subject_1006_Ramith/trans_map_dataset_2.h5'
+    train_dataset = 'data/de_silva/subject_1006_Ramith/trans_map_dataset_1.h5'
+    test_dataset = 'data/de_silva/subject_1006_Ramith/trans_map_dataset_2.h5'
 
 if gcrnnMethod or vanillagcnMethod:
-    train_dataset = 'data/subject_1001_Ashwin/graph_dataset_1n.txt'
-    test_dataset = 'data/subject_1001_Ashwin/graph_dataset_2n.txt'
-    model_path = 'data/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights_e200_clip0.5.txt'
+    train_dataset = 'data/de_silva/subject_1001_Ashwin/graph_dataset_1n.txt'
+    test_dataset = 'data/de_silva/subject_1001_Ashwin/graph_dataset_2n.txt'
+    model_path = 'data/de_silva/subject_1001_Ashwin/grnn_models/gcrnn_gcn_weights_e200_clip0.5.txt'
 
 if graphLearnGCNMethod:
-    train_dataset = 'graph_data/subject_1001_Ashwin/correlation_train_graph_topologies.mat'
-    test_dataset = 'graph_data/subject_1001_Ashwin/correlation_test_graph_topologies.mat'
+    train_dataset = 'graph_data/de_silva/subject_1001_Ashwin/correlation_train_graph_topologies.mat'
+    test_dataset = 'graph_data/de_silva/subject_1001_Ashwin/correlation_test_graph_topologies.mat'
 
 ## training parameters
 epochs = 20
