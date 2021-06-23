@@ -27,7 +27,7 @@ import os
 import numpy as np
 import h5py
 import pandas as pd
-from scipy.signal import decimate, butter, sosfilt
+from scipy.signal import decimate, butter, filtfilt
 import matplotlib.pyplot as plt
 
 # ////// body ///// 
@@ -92,7 +92,7 @@ def downsample(data, fs, factor):
 
 def preprocess(data, fs, lpfreq=1):
     """Preprocess the mulit-channel signals by first rectifying and then low pass filtering
-    the signals
+    the signals (with zero phase distortion)
 
     Parameters
     ----------
@@ -112,8 +112,8 @@ def preprocess(data, fs, lpfreq=1):
     data = abs(data)
 
     # low pass filtering
-    lpf = butter(2, lpfreq, 'lowpass', analog=False, fs=fs, output='sos') 
-    filt_data = sosfilt(lpf, data)
+    b, a = butter(2, lpfreq, 'lowpass', analog=False, fs=fs, output='ba') 
+    filt_data = filtfilt(b, a, data, axis=-1)
 
     return filt_data
     
@@ -135,6 +135,34 @@ def plot_recording(data, fs):
     for i in range(num_channels):
         axes[i].plot(t, data[i])
         i += 1
+    plt.show()
+
+def plot_recording_same_axis(data, fs):
+    """Plots the multi-channl signals on the same axis
+
+    Parameters
+    ----------
+    data : numpy array
+        Multi-channl signals of shape (num_channels, num_samples)
+    fs : float
+        sampling frequency
+    """
+    num_channels = data.shape[0]
+    num_samples = data.shape[1]
+    max_val = np.max(data)
+    t = np.arange(0, num_samples, 1) / fs
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ytick_pos = []
+    for i in range(num_channels):
+        y = data[i] + max_val*1.5*i
+        ax.plot(t, y)
+        ytick_pos.append(np.min(y))
+        i += 1
+    ax.set_yticks(ytick_pos)
+    ax.set_yticklabels(["CH1", "CH2", "CH3", "CH4", "CH5", "CH6", "CH7", "CH8"])
+    ax.set_xlabel("time (s)")
+    ax.grid()
     plt.show()
 
 def create_dataset(dataset_id, subject_id, labels, num_channels=8, num_samples=80):
