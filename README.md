@@ -1,24 +1,28 @@
 # MCW2Graph
+=============
 
 ## Installation Guide
-_
+-----------------------
 
 ### Step 1. Clone the respository
 
 Clone the repository using the following command.
 
-```$ git clone https://github.com/Laknath1996/MCW2Graph.git```
+```
+$ git clone https://github.com/Laknath1996/MCW2Graph.git
+```
 
 ### Step 1. Install the dependencies
 
-Use the ```requirements.txt``` file given in the repository to install the dependencies via ```pip``` in a newly created conda environment with python 3.6.
+Use the `requirements.txt` file given in the repository to install the dependencies via `pip` in a newly created conda environment with python 3.6.
 
-```$ pip install -r requirements.txt ```
+```
+$ pip install -r requirements.txt 
+```
 
 ## Project Organization
-_
 
-.
+-----------------------
 ├── README.md                       <- Project Details
 ├── requirements.txt                <- Dependencies
 ├── docs                            <- Documentation
@@ -63,6 +67,6 @@ _
 ├── graph_classification_svm.py        <- SVM implementation
 ├── graph_classification_vanilla.py    <- GCN implementation (*)
 └── experiments.py                     <- Script to run the final experiments
-
+-----------------------
 
 
