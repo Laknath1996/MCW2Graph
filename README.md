@@ -1,7 +1,6 @@
 # MCW2Graph
 
 ## Installation Guide
------------------------
 
 ### Step 1. Clone the respository
 
