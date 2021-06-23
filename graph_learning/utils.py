@@ -52,53 +52,6 @@ def getEllipticalCoordinates():
     }
     return pos
 
-def createWeightedGraphBeta(W, semgConfig=True, seed=1, **kwargs):
-    """
-    create a network topolgy given its Adjacency matrix
-    (Depricated)
-    """
-    m = W.shape[0]
-    G = nx.Graph()
-    for i in range(0, m):
-        for j in range(0, m):
-            G.add_edge(i, j, weight=W[i, j])
-
-    if semgConfig:
-        pos = getEllipticalCoordinates()
-    else:
-        pos = nx.random_layout(G, seed=seed)
-
-    weights = list(nx.get_edge_attributes(G,'weight').values())
-    line_widths = (weights - min(weights))/(max(weights)-min(weights))*5
-    edge_colors = (weights - min(weights))/(max(weights)-min(weights))
-
-    # plot the graph
-    fig = plt.figure(facecolor="w")
-    ax = fig.add_subplot(111)
-    nx.draw(G, pos, 
-        # width=list(line_widths),
-        with_labels=True,
-        arrows=True,
-        arrowstyle='->',
-        arrowsieze=20,
-        edge_color=list(edge_colors),
-        edge_cmap=plt.cm.Blues,
-        edge_vmin=min(edge_colors),
-        edge_vmax=max(edge_colors),
-        node_color='lightgreen',
-        ax=ax)
-        
-    ## add a colorbar
-    norm = mpl.colors.Normalize(vmin=min(weights), vmax=max(weights))
-    sm = plt.cm.ScalarMappable(cmap=plt.cm.Blues, norm=norm)
-    sm.set_array([])
-    # plt.axis('on') # turns on axis
-    ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
-    plt.colorbar(sm)
-    if kwargs['title'] is not None:
-        plt.title(kwargs['title'])
-    plt.show()
-
 def plotMultiChannelSignals(X, Fs):
     """Plots the given multi-channel window
 
@@ -274,6 +227,130 @@ def createWeightedGraph(W, remove_self_loops=True, title=None):
         if title is not None:
             plt.title(title)
         plt.show()  
+
+def plotMCWandGraph(X, fs, W, remove_self_loops=True, title=None, save_path=None):
+    """Plots the corresponding weighted undirected or directed graph topology
+    of the given adjacency matrix together with the corresponding multi-channel window
+
+    Parameters
+    ----------
+    X : numpy array
+        Multi-channel window of shape (num_channels, num_samples)
+    fs : float
+        Sampling frequency
+    W : numpy array
+        Adjacency matrix with shape (L, L). Currently, this function only
+        supports L=8
+    remove_self_loops : bool, optional
+        if True, remove self loops in the graph, by default True
+    title : str, optional
+        Title of the plotted graph topology, by default None
+    """
+    fig = plt.figure(facecolor="w", figsize=(12, 4))
+    ax1 = fig.add_subplot(121)
+    ax = fig.add_subplot(122)
+
+    ## plot the mutli-channel signals
+    num_channels = X.shape[0]
+    num_samples = X.shape[1]
+    max_val = np.max(X)
+    node_colors = plt.cm.rainbow(np.linspace(0, 1, num_channels))
+    t = np.arange(0, num_samples, 1) / fs
+    ytick_pos = []
+    for i, c in zip(range(num_channels), node_colors):
+        y = X[i] + max_val*1.5*i
+        ax1.plot(t, y, c=c)
+        ytick_pos.append(np.min(y))
+        i += 1
+    ax1.set_yticks(ytick_pos)
+    ax1.set_yticklabels(["CH1", "CH2", "CH3", "CH4", "CH5", "CH6", "CH7", "CH8"])
+    ax1.set_xlabel("time (s)")
+    if title is not None:
+        ax1.set_title("Multi-Channel Window - {}".format(title))
+    else:
+        ax1.set_title("Multi-Channel Window")
+    ax1.grid()
+
+    ## plot the graph
+    if np.allclose(W, W.T):
+        graphIsDirected = False
+    else:
+        graphIsDirected = True
+    if remove_self_loops:
+        np.fill_diagonal(W, 0)
+    m = W.shape[0]
+    pos = getEllipticalCoordinates()
+
+    if graphIsDirected:
+        ## plot directed weighted graph
+        G = nx.DiGraph()
+        for i in range(0, m):
+            for j in range(0, m):
+                G.add_edge(i+1, j+1, weight=W[i, j])
+
+        weights = list(nx.get_edge_attributes(G,'weight').values())
+        weightColors = (weights - min(weights))/(max(weights)-min(weights))
+
+        # plot the graph
+        nx.draw_networkx_nodes(G, pos, 
+                                with_labels=True, 
+                                node_color=node_colors, 
+                                ax=ax)
+        nx.draw_networkx_edges(G, pos, 
+                                arrows=True, arrowsize=20, arrowstyle='-|>',
+                                width=2,
+                                edge_color=weightColors,
+                                edge_cmap=plt.cm.Greys,
+                                edge_vmin=min(weightColors),
+                                edge_vmax=max(weightColors),
+                                connectionstyle='arc3, rad = 0.1',
+                                ax=ax)
+        nx.draw_networkx_labels(G, pos)
+            
+        # add colorbar
+        norm = mpl.colors.Normalize(vmin=min(weights), vmax=max(weights))
+        weightMap = plt.cm.ScalarMappable(cmap=plt.cm.Greys, norm=norm)
+        plt.axis('on')
+        plt.colorbar(weightMap)
+        if title is not None:
+            plt.title(title)
+        plt.show()
+
+    else:
+        ## plot unidrected weighted graph
+        G = nx.Graph()
+        for i in range(0, m):
+            for j in range(0, m):
+                G.add_edge(i+1, j+1, weight=W[i, j])
+
+        weights = list(nx.get_edge_attributes(G,'weight').values())
+        weightWidths = (weights - min(weights))/(max(weights)-min(weights))*5
+        weightColors = (weights - min(weights))/(max(weights)-min(weights))
+
+        # plot the graph
+        nx.draw(G, pos, 
+                    width=weightWidths,
+                    with_labels=True,
+                    edge_color=weightColors,
+                    edge_cmap=plt.cm.Greys,
+                    edge_vmin=min(weightColors),
+                    edge_vmax=max(weightColors),
+                    node_color=node_colors,
+                    ax=ax)
+            
+        ## add a colorbar
+        norm = mpl.colors.Normalize(vmin=min(weights), vmax=max(weights))
+        weightMap = plt.cm.ScalarMappable(cmap=plt.cm.Greys, norm=norm)
+        plt.axis('on')
+        plt.colorbar(weightMap)
+        if title is not None:
+            plt.title("Graph - {}".format(title))
+        else:
+            plt.title("Graph")
+        if save_path is not None:
+            plt.savefig(save_path)
+        else:   
+            plt.show()
 
 def rescaleMCW(X):
     """
