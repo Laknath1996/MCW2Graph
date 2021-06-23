@@ -18,6 +18,10 @@ Use the `requirements.txt` file given in the repository to install the dependenc
 $ pip install -r requirements.txt 
 ```
 
+## Documentation
+
+To access the documentation, open `/docs/build/html/index.html` using a web browser.
+
 ## Project Organization
 
 ------------
