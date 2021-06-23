@@ -18,7 +18,7 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# Objective : Use this script to run developer experiments 
+# Objective : Learn the graph topologies for the MCWs in Kushaba et al's dataset
 #
 
 #////// libraries //////
@@ -40,7 +40,7 @@ from tma.utils import plot_latent_space
 ## User Inputs
 id = "kushaba"
 s_id = 1
-labels = ["M_M", "R_R", "I_I", "L_L", "HC_"] # "T_I", "T_M", "T_R", "T_L", "I_M", "M_R", "R_L", "IMR", "MRL"]
+labels = ["M_M", "R_R", "I_I", "L_L", "HC_"] # "T_T", T_I", "T_M", "T_R", "T_L", "I_M", "M_R", "R_L", "IMR", "MRL"]
 visualizeLearntGraphs = True
 visualizeLatentSpace = True
 L = 8
