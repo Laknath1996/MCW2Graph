@@ -1239,8 +1239,9 @@ class DiffusionGraphLearn:
             b = -np.matmul(Q_full[D].T, np.ones((L, 1)))
 
             # solve basis pursuit with noisy observations
-            l_Dcomp = np.array(l1regls(matrix(A / np.sqrt(beta_2)), matrix(b / np.sqrt(beta_2))))
-            
+            # l_Dcomp = np.array(l1regls(matrix(A / np.sqrt(beta_2)), matrix(b / np.sqrt(beta_2))))
+            l_Dcomp = np.matmul(np.linalg.inv( np.matmul(A.T, A) + beta_2*np.identity(A.shape[1]) ), np.matmul(A.T, b))
+
             # obtain W from L
             l = np.zeros((L*L, ))
             l[Dcomp] = l_Dcomp.squeeze()
