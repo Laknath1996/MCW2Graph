@@ -49,20 +49,20 @@ class_labels = ['Middle_Flexion', 'Ring_Flexion', 'Hand_Closure', 'V_Flexion','P
 dataset_type = "train"
 
 # graph dataset
-graph_data_path = 'graph_data/de_silva/subject_1004_Ashwin'
+graph_data_path = 'graph_data/de_silva/subject_1001_Ashwin'
 
 # method
 useJustMCW = False
 useTMAmaps = False
 useCorrelationGraphLearn = False
 usePartialCorrelationGraphLearn = False
-useGraphicalLassoGraphLearn = False
+useGraphicalLassoGraphLearn = True
 useStructualEqnModelGraphLearn = False
 useSVARMGraphLearn = False
 useSmoothAutoregressGraphLearn = False
 useSmoothSignalGraphLearn = False
 useAutoregressiveGraphLearn = False
-useDiffusionGraphLearn = True
+useDiffusionGraphLearn = False
 
 # hyperparameters
 verbosity=False     # verbosity flag
@@ -78,7 +78,6 @@ X_tma, y = load_tma_data(data_path)
 
 ## extracting the first order terms of each TMA map.
 X = X_tma[:, :8, :]     # the multi-channel envelopes (8-channels of myo armband)
-X = X[y==4]
 L = X.shape[1]      # number of channels
 
 ## learn the graph

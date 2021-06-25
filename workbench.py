@@ -41,10 +41,10 @@ from tma.utils import plot_latent_space
 
 ## User Inputs
 id = "de_silva"
-data_path = "data/de_silva/subject_1002_Malsha"
-label = "PO_1"
-title = "Pointer"
-onsets_file = "data/de_silva/subject_1002_Malsha/onsets.csv"
+data_path = "data/de_silva/subject_1001_Ashwin"
+label = "M_2"
+title = "Middle Flexion"
+onsets_file = "data/de_silva/subject_1001_Ashwin/onsets.csv"
 fs = 200
 path = "figures/subject_1002"
 
@@ -54,9 +54,9 @@ beta_1 = 10
 beta_2 = 5
 
 ## Flags
-getOnsets = False
+getOnsets = True
 plotGraphs = False
-reduceDims = True
+reduceDims = False
 combinedReduceDims = False
 
 # //////////////////////
